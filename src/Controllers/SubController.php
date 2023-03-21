@@ -344,6 +344,10 @@ final class SubController extends BaseController
             'mode' => 'Global',
             'log-level' => 'error',
             'external-controller' => '0.0.0.0:9090',
+            'dns' => '',
+                'enable' => 'true',
+                'ipv6' => 'false',
+                
             'proxies' => $nodes,
         ];
 
