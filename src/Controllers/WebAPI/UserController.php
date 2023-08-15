@@ -196,6 +196,7 @@ final class UserController extends BaseController
         if (! $data || ! is_array($data->data)) {
             return $response->withJson([
                 'ret' => 0,
+                'data' => 'Invalid request.',
             ]);
         }
 
@@ -205,6 +206,7 @@ final class UserController extends BaseController
         if ($node_id === null || ! Node::where('id', $node_id)->exists()) {
             return $response->withJson([
                 'ret' => 0,
+                'data' => 'Node not found.'
             ]);
         }
 
