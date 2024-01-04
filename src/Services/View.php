@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Addon\Hook\AdminHeaderItemHook;
 use App\Models\Config;
 use Illuminate\Database\DatabaseManager;
 use Smarty;
@@ -27,6 +28,7 @@ final class View
         $smarty->assign('config', self::getConfig());
         $smarty->assign('public_setting', Config::getPublicConfig());
         $smarty->assign('user', $user);
+        $smarty->assign('addon_admin_header_items', AdminHeaderItemHook::getInstance()->runhook());
 
         return $smarty;
     }
