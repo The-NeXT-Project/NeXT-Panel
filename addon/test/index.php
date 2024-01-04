@@ -3,7 +3,7 @@ namespace TestAddon;
 
 use App\Addon\Hook\AdminHeaderItemHook;
 
-require_once(dirname(__DIR__, 2) . '/src/Addon/Hook/AdminHeaderItemHook.php');
+require_once dirname(__DIR__, 2) . '/src/Addon/Hook/AdminHeaderItemHook.php';
 
 
 AdminHeaderItemHook::getInstance()->addhook(function () {
