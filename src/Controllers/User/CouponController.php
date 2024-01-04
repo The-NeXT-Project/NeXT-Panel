@@ -11,7 +11,6 @@ use App\Models\UserCoupon;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Response;
 use Slim\Http\ServerRequest;
-use voku\helper\AntiXSS;
 use function explode;
 use function in_array;
 use function json_decode;
@@ -21,9 +20,8 @@ final class CouponController extends BaseController
 {
     public function check(ServerRequest $request, Response $response, array $args): Response|ResponseInterface
     {
-        $antiXss = new AntiXSS();
-        $coupon_raw = $antiXss->xss_clean($request->getParam('coupon'));
-        $product_id = $antiXss->xss_clean($request->getParam('product_id'));
+        $coupon_raw = $this->antiXss->xss_clean($request->getParam('coupon'));
+        $product_id = $this->antiXss->xss_clean($request->getParam('product_id'));
         $invalid_coupon_msg = '优惠码无效';
 
         if ($coupon_raw === '') {
@@ -33,7 +31,7 @@ final class CouponController extends BaseController
             ]);
         }
 
-        $coupon = UserCoupon::where('code', $coupon_raw)->first();
+        $coupon = (new UserCoupon())->where('code', $coupon_raw)->first();
 
         if ($coupon === null || ($coupon->expire_time !== 0 && $coupon->expire_time < time())) {
             return $response->withJson([
@@ -42,7 +40,7 @@ final class CouponController extends BaseController
             ]);
         }
 
-        $product = Product::where('id', $product_id)->first();
+        $product = (new Product())->where('id', $product_id)->first();
 
         if ($product === null) {
             return $response->withJson([
@@ -71,7 +69,7 @@ final class CouponController extends BaseController
         $use_limit = $limit->use_time;
 
         if ($use_limit > 0) {
-            $user_use_count = Order::where('user_id', $user->id)->where('coupon', $coupon->code)->count();
+            $user_use_count = (new Order())->where('user_id', $user->id)->where('coupon', $coupon->code)->count();
             if ($user_use_count >= $use_limit) {
                 return $response->withJson([
                     'ret' => 0,

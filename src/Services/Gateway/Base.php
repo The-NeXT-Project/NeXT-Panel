@@ -13,6 +13,7 @@ use App\Utils\Tools;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Response;
 use Slim\Http\ServerRequest;
+use voku\helper\AntiXSS;
 use function get_called_class;
 use function in_array;
 use function json_decode;
@@ -20,6 +21,8 @@ use function time;
 
 abstract class Base
 {
+    protected AntiXSS $antiXss;
+
     abstract public function purchase(ServerRequest $request, Response $response, array $args): ResponseInterface;
 
     abstract public function notify(ServerRequest $request, Response $response, array $args): ResponseInterface;
@@ -46,7 +49,7 @@ abstract class Base
 
     public function getStatus(ServerRequest $request, Response $response, array $args): ResponseInterface
     {
-        $p = Paylist::where('tradeno', $_POST['pid'])->first();
+        $p = (new Paylist())->where('tradeno', $_POST['pid'])->first();
 
         return $response->withJson([
             'ret' => 1,
@@ -58,7 +61,7 @@ abstract class Base
 
     public function postPayment($trade_no): void
     {
-        $paylist = Paylist::where('tradeno', $trade_no)->first();
+        $paylist = (new Paylist())->where('tradeno', $trade_no)->first();
 
         if ($paylist?->status === 0) {
             $paylist->datetime = time();
@@ -66,7 +69,7 @@ abstract class Base
             $paylist->save();
         }
 
-        $invoice = Invoice::where('id', $paylist?->invoice_id)->first();
+        $invoice = (new Invoice())->where('id', $paylist?->invoice_id)->first();
 
         if ($invoice?->status === 'unpaid' && (int) $invoice?->price === (int) $paylist?->total) {
             $invoice->status = 'paid_gateway';
@@ -75,7 +78,7 @@ abstract class Base
             $invoice->save();
         }
 
-        $user = User::find($paylist?->userid);
+        $user = (new User())->find($paylist?->userid);
         // 返利
         if ($user !== null && $user->ref_by > 0 && Config::obtain('invitation_mode') === 'after_paid') {
             (new Payback())->rebate($user->id, $paylist->total);
@@ -99,7 +102,7 @@ abstract class Base
 
     protected static function getActiveGateway($key): bool
     {
-        $payment_gateways = Config::where('item', 'payment_gateway')->first();
+        $payment_gateways = (new Config())->where('item', 'payment_gateway')->first();
         $active_gateways = json_decode($payment_gateways->value);
         if (in_array($key, $active_gateways)) {
             return true;

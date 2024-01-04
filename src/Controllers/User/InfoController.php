@@ -19,7 +19,6 @@ use Ramsey\Uuid\Uuid;
 use RedisException;
 use Slim\Http\Response;
 use Slim\Http\ServerRequest;
-use voku\helper\AntiXSS;
 use function in_array;
 use function strlen;
 use function strtolower;
@@ -49,8 +48,7 @@ final class InfoController extends BaseController
      */
     public function updateEmail(ServerRequest $request, Response $response, array $args): Response|ResponseInterface
     {
-        $antiXss = new AntiXSS();
-        $new_email = $antiXss->xss_clean($request->getParam('newemail'));
+        $new_email = $this->antiXss->xss_clean($request->getParam('newemail'));
         $user = $this->user;
         $old_email = $user->email;
 
@@ -68,7 +66,7 @@ final class InfoController extends BaseController
             return $response->withJson($check_res);
         }
 
-        $exist_user = User::where('email', $new_email)->first();
+        $exist_user = (new User())->where('email', $new_email)->first();
 
         if ($exist_user !== null) {
             return ResponseHelper::error($response, '邮箱已经被使用了');
@@ -79,7 +77,7 @@ final class InfoController extends BaseController
         }
 
         if (Config::obtain('reg_email_verify')) {
-            $redis = Cache::initRedis();
+            $redis = (new Cache())->initRedis();
             $email_verify_code = $request->getParam('emailcode');
             $email_verify = $redis->get('email_verify:' . $email_verify_code);
 
@@ -107,8 +105,7 @@ final class InfoController extends BaseController
 
     public function updateUsername(ServerRequest $request, Response $response, array $args): ResponseInterface
     {
-        $antiXss = new AntiXSS();
-        $newusername = $antiXss->xss_clean($request->getParam('newusername'));
+        $newusername = $this->antiXss->xss_clean($request->getParam('newusername'));
         $user = $this->user;
 
         if ($user->is_shadow_banned) {
@@ -212,10 +209,8 @@ final class InfoController extends BaseController
 
     public function updateMethod(ServerRequest $request, Response $response, array $args): ResponseInterface
     {
-        $antiXss = new AntiXSS();
-
         $user = $this->user;
-        $method = strtolower($antiXss->xss_clean($request->getParam('method')));
+        $method = strtolower($this->antiXss->xss_clean($request->getParam('method')));
 
         if ($method === '') {
             ResponseHelper::error($response, '非法输入');
@@ -294,8 +289,7 @@ final class InfoController extends BaseController
 
     public function updateTheme(ServerRequest $request, Response $response, array $args): Response|ResponseInterface
     {
-        $antiXss = new AntiXSS();
-        $theme = $antiXss->xss_clean($request->getParam('theme'));
+        $theme = $this->antiXss->xss_clean($request->getParam('theme'));
         $user = $this->user;
 
         if ($theme === '') {

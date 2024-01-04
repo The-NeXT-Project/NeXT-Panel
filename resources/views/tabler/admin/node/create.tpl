@@ -97,6 +97,15 @@
                                 </span>
                             </div>
                             <div class="form-group mb-3 row">
+                                <label class="form-label col-3 col-form-label">动态流量倍率计算方式</label>
+                                <div class="col">
+                                    <select id="dynamic_rate_type" class="col form-select">
+                                        <option value="0">Logistic</option>
+                                        <option value="1">Linear</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group mb-3 row">
                                 <label class="form-label col-3 col-form-label">最大倍率</label>
                                 <div class="col">
                                     <input id="max_rate" type="text" class="form-control" value="">
@@ -132,12 +141,6 @@
                             <h3 class="card-title">其他信息</h3>
                         </div>
                         <div class="card-body">
-                            <div class="form-group mb-3 row">
-                                <label class="form-label col-3 col-form-label">备注</label>
-                                <div class="col">
-                                    <input id="info" type="text" class="form-control" value="">
-                                </div>
-                            </div>
                             <div class="form-group mb-3 row">
                                 <label class="form-label col-3 col-form-label required">等级</label>
                                 <div class="col">
@@ -184,7 +187,7 @@
 
 <script>
     const container = document.getElementById('custom_config');
-    var options = {
+    let options = {
         modes: ['code', 'tree'],
     };
     const editor = new JSONEditor(container, options);

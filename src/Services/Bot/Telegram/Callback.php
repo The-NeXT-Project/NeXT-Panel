@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services\Bot\Telegram;
 
-use App\Controllers\SubController;
 use App\Models\Config;
 use App\Models\InviteCode;
 use App\Models\LoginIp;
 use App\Models\OnlineLog;
 use App\Models\Payback;
 use App\Models\SubscribeLog;
+use App\Models\User;
+use App\Services\Subscribe;
 use App\Utils\Tools;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use MaxMind\Db\Reader\InvalidDatabaseException;
 use Telegram\Bot\Api;
@@ -38,7 +40,7 @@ final class Callback
     /**
      * 触发用户
      */
-    private $user;
+    private null|Model|User $user;
 
     /**
      * 触发用户TG信息
@@ -331,7 +333,7 @@ final class Callback
         switch ($OpEnd) {
             case 'login_log':
                 // 登录记录
-                $total = LoginIp::where('userid', $this->user->id)
+                $total = (new LoginIp())->where('userid', $this->user->id)
                     ->where('type', '=', 0)
                     ->orderBy('datetime', 'desc')
                     ->take(10)
@@ -359,7 +361,7 @@ final class Callback
                 break;
             case 'usage_log':
                 // 使用记录
-                $logs = OnlineLog::where('user_id', $this->user->id)
+                $logs = (new OnlineLog())->where('user_id', $this->user->id)
                     ->where('last_time', '>', time() - 90)->orderByDesc('last_time')->get('ip');
                 $text = '<strong>以下是你账户在线 IP 和地理位置：</strong>' . PHP_EOL . PHP_EOL;
 
@@ -385,7 +387,7 @@ final class Callback
                 break;
             case 'rebate_log':
                 // 返利记录
-                $paybacks = Payback::where('ref_by', $this->user->id)->orderBy('datetime', 'desc')->take(10)->get();
+                $paybacks = (new Payback())->where('ref_by', $this->user->id)->orderBy('datetime', 'desc')->take(10)->get();
                 $text = '<strong>以下是你最近 10 次返利记录：</strong>' . PHP_EOL . PHP_EOL;
 
                 foreach ($paybacks as $payback) {
@@ -410,7 +412,7 @@ final class Callback
             case 'subscribe_log':
                 // 订阅记录
                 if (Config::obtain('subscribe_log')) {
-                    $logs = SubscribeLog::orderBy('id', 'desc')->where('user_id', $this->user->id)->take(10)->get();
+                    $logs = (new SubscribeLog())->orderBy('id', 'desc')->where('user_id', $this->user->id)->take(10)->get();
                     $text = '<strong>以下是你最近 10 次订阅记录：</strong>' . PHP_EOL . PHP_EOL;
 
                     foreach ($logs as $log) {
@@ -731,21 +733,29 @@ final class Callback
                     'callback_data' => 'user.subscribe|json',
                 ],
                 [
-                    'text' => 'Shadowsocks SIP008',
+                    'text' => 'SIP008',
                     'callback_data' => 'user.subscribe|sip008',
                 ],
             ],
             [
                 [
+                    'text' => 'SingBox',
+                    'callback_data' => 'user.subscribe|singbox',
+                ],
+                [
+                    'text' => 'V2RayJson',
+                    'callback_data' => 'user.subscribe|v2rayjson',
+                ],
+                [
                     'text' => 'Shadowsocks',
                     'callback_data' => 'user.subscribe|ss',
                 ],
-                [
-                    'text' => 'Shadowsocks SIP002',
-                    'callback_data' => 'user.subscribe|sip002',
-                ],
             ],
             [
+                [
+                    'text' => 'SIP002',
+                    'callback_data' => 'user.subscribe|sip002',
+                ],
                 [
                     'text' => 'V2Ray',
                     'callback_data' => 'user.subscribe|v2',
@@ -763,14 +773,10 @@ final class Callback
             ],
         ];
 
-        if (! Config::obtain('enable_traditional_sub')) {
-            unset($keyboard[1]);
-            unset($keyboard[2]);
-        }
-
         if (! Config::obtain('enable_ss_sub')) {
             unset($keyboard[0][2]);
-            unset($keyboard[1]);
+            unset($keyboard[1][1]);
+            unset($keyboard[1][2]);
         }
 
         if (! Config::obtain('enable_v2_sub')) {
@@ -814,24 +820,27 @@ final class Callback
 
             $sendMessage = [];
 
-            $UniversalSub_Url = SubController::getUniversalSubLink($this->user);
-            $TraditionalSub_Url = SubController::getTraditionalSubLink($this->user);
+            $UniversalSub_Url = Subscribe::getUniversalSubLink($this->user);
 
             $text = match ($CallbackDataExplode[1]) {
-                'clash' => 'Clash 通用订阅地址：' . PHP_EOL . PHP_EOL .
-                    '<code>' . $UniversalSub_Url . '/clash</code>' . PHP_EOL . PHP_EOL,
                 'json' => 'Json 通用订阅地址：' . PHP_EOL . PHP_EOL .
                     '<code>' . $UniversalSub_Url . '/json</code>' . PHP_EOL . PHP_EOL,
-                'sip008' => 'Shadowsocks SIP008 通用订阅地址：' . PHP_EOL . PHP_EOL .
+                'clash' => 'Clash 通用订阅地址：' . PHP_EOL . PHP_EOL .
+                    '<code>' . $UniversalSub_Url . '/clash</code>' . PHP_EOL . PHP_EOL,
+                'singbox' => 'SingBox 通用订阅地址：' . PHP_EOL . PHP_EOL .
+                    '<code>' . $UniversalSub_Url . '/singbox</code>' . PHP_EOL . PHP_EOL,
+                'v2rayjson' => 'V2RayJson 通用订阅地址：' . PHP_EOL . PHP_EOL .
+                    '<code>' . $UniversalSub_Url . '/v2rayjson</code>' . PHP_EOL . PHP_EOL,
+                'sip008' => 'SIP008 通用订阅地址：' . PHP_EOL . PHP_EOL .
                     '<code>' . $UniversalSub_Url . '/sip008</code>' . PHP_EOL . PHP_EOL,
-                'ss' => 'Shadowsocks 传统订阅地址：' . PHP_EOL . PHP_EOL .
-                    '<code>' . $TraditionalSub_Url . '?ss=1</code>' . PHP_EOL . PHP_EOL,
-                'sip002' => 'Shadowsocks SIP002 传统订阅地址：' . PHP_EOL . PHP_EOL .
-                    '<code>' . $TraditionalSub_Url . '?sip002=1</code>' . PHP_EOL . PHP_EOL,
-                'v2' => 'V2Ray 传统订阅地址：' . PHP_EOL . PHP_EOL .
-                    '<code>' . $TraditionalSub_Url . '?v2ray=1</code>' . PHP_EOL . PHP_EOL,
-                'trojan' => 'Trojan 传统订阅地址：' . PHP_EOL . PHP_EOL .
-                    '<code>' . $TraditionalSub_Url . '?trojan=1</code>' . PHP_EOL . PHP_EOL,
+                'ss' => 'Shadowsocks 客户端订阅地址：' . PHP_EOL . PHP_EOL .
+                    '<code>' . $UniversalSub_Url . '/ss</code>' . PHP_EOL . PHP_EOL,
+                'sip002' => 'SIP002 客户端订阅地址：' . PHP_EOL . PHP_EOL .
+                    '<code>' . $UniversalSub_Url . '/sip002</code>' . PHP_EOL . PHP_EOL,
+                'v2' => 'V2Ray 客户端订阅地址：' . PHP_EOL . PHP_EOL .
+                    '<code>' . $UniversalSub_Url . '/v2ray</code>' . PHP_EOL . PHP_EOL,
+                'trojan' => 'Trojan 客户端订阅地址：' . PHP_EOL . PHP_EOL .
+                    '<code>' . $UniversalSub_Url . '/trojan</code>' . PHP_EOL . PHP_EOL,
                 default => '未知参数' . PHP_EOL . PHP_EOL,
             };
 
@@ -872,7 +881,7 @@ final class Callback
 
     public function getUserInviteKeyboard(): array
     {
-        $paybacks_sum = Payback::where('ref_by', $this->user->id)->sum('ref_get');
+        $paybacks_sum = (new Payback())->where('ref_by', $this->user->id)->sum('ref_get');
 
         if (is_null($paybacks_sum)) {
             $paybacks_sum = 0;
@@ -924,11 +933,11 @@ final class Callback
 
         if ($OpEnd === 'get') {
             $this->allow_edit_message = false;
-            $code = InviteCode::where('user_id', $this->user->id)->first();
+            $code = (new InviteCode())->where('user_id', $this->user->id)->first();
 
             if ($code === null) {
                 $this->user->addInviteCode();
-                $code = InviteCode::where('user_id', $this->user->id)->first();
+                $code = (new InviteCode())->where('user_id', $this->user->id)->first();
             }
 
             $inviteUrl = $_ENV['baseUrl'] . '/auth/register?code=' . $code->code;

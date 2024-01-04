@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers\User;
 
 use App\Controllers\BaseController;
+use App\Models\Config;
 use App\Models\SubscribeLog;
 use App\Utils\Tools;
 use Exception;
@@ -21,13 +22,14 @@ final class SubLogController extends BaseController
      */
     public function index(ServerRequest $request, Response $response, array $args): Response|ResponseInterface
     {
-        $logs = SubscribeLog::orderBy('id', 'desc')->where('user_id', $this->user->id)->get();
+        $logs = (new SubscribeLog())->orderBy('id', 'desc')->where('user_id', $this->user->id)->get();
 
         foreach ($logs as $log) {
             $log->request_time = Tools::toDateTime($log->request_time);
         }
 
         return $response->write($this->view()
+            ->assign('subscribe_log_retention_days', Config::obtain('subscribe_log_retention_days'))
             ->assign('logs', $logs)
             ->fetch('user/subscribe_log.tpl'));
     }

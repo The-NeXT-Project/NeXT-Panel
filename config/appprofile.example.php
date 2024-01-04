@@ -2,6 +2,47 @@
 
 declare(strict_types=1);
 
+$_ENV['V2RayJson_Config'] = [
+    'log' => [
+        'error' => [
+            'level' => 'error',
+            'type' => 'console',
+        ],
+        'access' => [
+            'type' => 'none',
+        ],
+    ],
+    'dns' => [
+        'nameServer' => [
+            [
+                'address' => '1.1.1.1',
+            ],
+            [
+                'address' => '1.0.0.1',
+            ],
+        ],
+    ],
+    'inbounds' => [
+        [
+            'protocol' => 'socks',
+            'settings' => [
+                'udpEnabled' => true,
+                'address' => '127.0.0.1',
+                'packetEncoding' => 'packet',
+            ],
+            'port' => 7892,
+            'listen' => '127.0.0.1',
+        ],
+        [
+            'protocol' => 'http',
+            'settings' => [],
+            'port' => 7893,
+            'listen' => '127.0.0.1',
+        ],
+    ],
+    'outbounds' => [],
+];
+
 $_ENV['SingBox_Config'] = [
     'log' => [
         'level' => 'error',
@@ -41,10 +82,6 @@ $_ENV['SingBox_Config'] = [
                 'mode' => 'and',
                 'rules' => [
                     [
-                        'geosite' => 'google@cn',
-                        'invert' => true,
-                    ],
-                    [
                         'geosite' => [
                             'cn',
                         ],
@@ -68,7 +105,7 @@ $_ENV['SingBox_Config'] = [
                 'http_proxy' => [
                     'enabled' => true,
                     'server' => '127.0.0.1',
-                    'server_port' => 8100,
+                    'server_port' => 7891,
                 ],
             ],
             'sniff' => true,
@@ -76,7 +113,7 @@ $_ENV['SingBox_Config'] = [
         [
             'type' => 'mixed',
             'listen' => '127.0.0.1',
-            'listen_port' => 8100,
+            'listen_port' => 7891,
             'sniff' => true,
             'domain_strategy' => 'prefer_ipv4',
         ],
@@ -136,10 +173,6 @@ $_ENV['SingBox_Config'] = [
                 'mode' => 'and',
                 'rules' => [
                     [
-                        'geosite' => 'google@cn',
-                        'invert' => true,
-                    ],
-                    [
                         'geosite' => [
                             'cn',
                         ],
@@ -156,7 +189,7 @@ $_ENV['SingBox_Config'] = [
     ],
     'experimental' => [
         'clash_api' => [
-            'external_controller' => '0.0.0.0:9090',
+            'external_controller' => '127.0.0.1:9090',
             'store_mode' => true,
             'store_selected' => true,
             'cache_id' => '',
