@@ -4,7 +4,7 @@ namespace App\Addon\Hook;
 
 abstract class BaseHook
 {
-    static $instances = array();
+    protected static $instances = array();
     protected function __construct()
     {
     }
@@ -28,7 +28,7 @@ abstract class BaseHook
     private function __clone()
     {
     }
-    public function __wakeup()
+    public function __wakeup():void
     {
     }
     abstract public function addhook($hook);
