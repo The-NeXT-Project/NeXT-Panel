@@ -27,11 +27,11 @@ abstract class BaseHook
     {
         $calledClass = $name;
 
-        if (!isset($instances[$calledClass])) {
-            $instances[$calledClass] = new $calledClass();
+        if (! isset(self::$instances[$calledClass])) {
+            self::$instances[$calledClass] = new $calledClass();
         }
 
-        return $instances[$calledClass];
+        return self::$instances[$calledClass];
     }
     abstract public function addhook($hook);
     abstract public function runhook();

@@ -22,7 +22,6 @@ use GuzzleHttp\Psr7\ServerRequest;
 use Slim\Factory\AppFactory;
 use Slim\Http\Factory\DecoratedResponseFactory;
 
-
 Boot::setTime();
 Boot::bootSentry();
 Boot::bootDb();
