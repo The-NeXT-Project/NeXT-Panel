@@ -9,15 +9,13 @@ use App\Services\Cloudflare;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Response;
 use Slim\Http\ServerRequest;
-use voku\helper\AntiXSS;
 use function in_array;
 
 final class ClientController extends BaseController
 {
     public function getClients(ServerRequest $request, Response $response, array $args): Response|ResponseInterface
     {
-        $antiXss = new AntiXSS();
-        $clientName = $antiXss->xss_clean($args['name']);
+        $clientName = $this->antiXss->xss_clean($args['name']);
 
         if (! $_ENV['enable_r2_client_download'] || $clientName === '' || $clientName === null) {
             return $response->withStatus(404);
@@ -27,7 +25,7 @@ final class ClientController extends BaseController
             'Clash.Verge.exe',
             'Clash.Verge_aarch64.dmg',
             'Clash.Verge.AppImage.tar.gz',
-            'Clash-Android.apk',
+            'CMFA.apk',
             'SFA.apk',
             'SFM.zip',
         ];

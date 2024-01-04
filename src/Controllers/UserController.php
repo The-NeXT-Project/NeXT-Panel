@@ -13,6 +13,7 @@ use App\Models\OnlineLog;
 use App\Models\Payback;
 use App\Services\Auth;
 use App\Services\Captcha;
+use App\Services\Subscribe;
 use App\Utils\ResponseHelper;
 use App\Utils\Tools;
 use Exception;
@@ -40,11 +41,10 @@ final class UserController extends BaseController
 
         return $response->write(
             $this->view()
-                ->assign('ann', Ann::orderBy('date', 'desc')->first())
+                ->assign('ann', (new Ann())->orderBy('date', 'desc')->first())
                 ->assign('captcha', $captcha)
                 ->assign('class_expire_days', $class_expire_days)
-                ->assign('UniversalSub', SubController::getUniversalSubLink($this->user))
-                ->assign('TraditionalSub', SubController::getTraditionalSubLink($this->user))
+                ->assign('UniversalSub', Subscribe::getUniversalSubLink($this->user))
                 ->fetch('user/index.tpl')
         );
     }
@@ -55,9 +55,9 @@ final class UserController extends BaseController
     public function profile(ServerRequest $request, Response $response, array $args): Response|ResponseInterface
     {
         // 登录IP
-        $logins = LoginIp::where('userid', $this->user->id)
+        $logins = (new LoginIp())->where('userid', $this->user->id)
             ->where('type', '=', 0)->orderBy('datetime', 'desc')->take(10)->get();
-        $ips = OnlineLog::where('user_id', $this->user->id)
+        $ips = (new OnlineLog())->where('user_id', $this->user->id)
             ->where('last_time', '>', time() - 90)->orderByDesc('last_time')->get();
 
         foreach ($logins as $login) {
@@ -73,7 +73,7 @@ final class UserController extends BaseController
         foreach ($ips as $ip) {
             $ip->ip = str_replace('::ffff:', '', $ip->ip);
             $ip->location = Tools::getIpLocation($ip->ip);
-            $ip->node_name = Node::where('id', $ip->node_id)->first()->name;
+            $ip->node_name = (new Node())->where('id', $ip->node_id)->first()->name;
             $ip->last_time = Tools::toDateTime((int) $ip->last_time);
         }
 
@@ -90,7 +90,7 @@ final class UserController extends BaseController
      */
     public function announcement(ServerRequest $request, Response $response, array $args): Response|ResponseInterface
     {
-        $anns = Ann::orderBy('date', 'desc')->get();
+        $anns = (new Ann())->orderBy('date', 'desc')->get();
 
         return $response->write(
             $this->view()
@@ -104,13 +104,13 @@ final class UserController extends BaseController
      */
     public function invite(ServerRequest $request, Response $response, array $args): Response|ResponseInterface
     {
-        $code = InviteCode::where('user_id', $this->user->id)->first()?->code;
+        $code = (new InviteCode())->where('user_id', $this->user->id)->first()?->code;
 
         if ($code === null) {
             $code = $this->user->addInviteCode();
         }
 
-        $paybacks = Payback::where('ref_by', $this->user->id)
+        $paybacks = (new Payback())->where('ref_by', $this->user->id)
             ->orderBy('id', 'desc')
             ->get();
 
@@ -118,7 +118,7 @@ final class UserController extends BaseController
             $payback->datetime = Tools::toDateTime($payback->datetime);
         }
 
-        $paybacks_sum = Payback::where('ref_by', $this->user->id)->sum('ref_get');
+        $paybacks_sum = (new Payback())->where('ref_by', $this->user->id)->sum('ref_get');
 
         if (! $paybacks_sum) {
             $paybacks_sum = 0;
@@ -155,9 +155,12 @@ final class UserController extends BaseController
             return ResponseHelper::error($response, (string) $checkin['msg']);
         }
 
-        return $response->withHeader('HX-Refresh', 'true')->withJson([
+        return $response->withJson([
             'ret' => 1,
             'msg' => $checkin['msg'],
+            'data' => [
+                'last-checkin-time' => $this->user->lastCheckInTime(),
+            ],
         ]);
     }
 

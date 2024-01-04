@@ -14,7 +14,6 @@ use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Response;
 use Slim\Http\ServerRequest;
-use voku\helper\AntiXSS;
 use function json_decode;
 use function time;
 
@@ -50,10 +49,9 @@ final class InvoiceController extends BaseController
      */
     public function detail(ServerRequest $request, Response $response, array $args): Response|ResponseInterface
     {
-        $antiXss = new AntiXSS();
-        $id = $antiXss->xss_clean($args['id']);
+        $id = $this->antiXss->xss_clean($args['id']);
 
-        $invoice = Invoice::where('user_id', $this->user->id)->where('id', $id)->first();
+        $invoice = (new Invoice())->where('user_id', $this->user->id)->where('id', $id)->first();
 
         if ($invoice === null) {
             return $response->withRedirect('/user/invoice');
@@ -62,7 +60,7 @@ final class InvoiceController extends BaseController
         $paylist = [];
 
         if ($invoice->status === 'paid_gateway') {
-            $paylist = Paylist::where('invoice_id', $invoice->id)->where('status', 1)->first();
+            $paylist = (new Paylist())->where('invoice_id', $invoice->id)->where('status', 1)->first();
         }
 
         $invoice->status_text = $invoice->status();
@@ -83,10 +81,9 @@ final class InvoiceController extends BaseController
 
     public function payBalance(ServerRequest $request, Response $response, array $args): Response|ResponseInterface
     {
-        $antiXss = new AntiXSS();
-        $invoice_id = $antiXss->xss_clean($request->getParam('invoice_id'));
+        $invoice_id = $this->antiXss->xss_clean($request->getParam('invoice_id'));
 
-        $invoice = Invoice::where('user_id', $this->user->id)->where('id', $invoice_id)->first();
+        $invoice = (new Invoice())->where('user_id', $this->user->id)->where('id', $invoice_id)->first();
 
         if ($invoice === null) {
             return $response->withJson([
@@ -117,7 +114,7 @@ final class InvoiceController extends BaseController
 
         (new UserMoneyLog())->add(
             $user->id,
-            (float) $money_before,
+            $money_before,
             (float) $user->money,
             -$invoice->price,
             '支付账单 #' . $invoice->id
@@ -136,7 +133,7 @@ final class InvoiceController extends BaseController
 
     public function ajax(ServerRequest $request, Response $response, array $args): Response|ResponseInterface
     {
-        $invoices = Invoice::orderBy('id', 'desc')->where('user_id', $this->user->id)->get();
+        $invoices = (new Invoice())->orderBy('id', 'desc')->where('user_id', $this->user->id)->get();
 
         foreach ($invoices as $invoice) {
             $invoice->op = '<a class="btn btn-blue" href="/user/invoice/' . $invoice->id . '/view">查看</a>';

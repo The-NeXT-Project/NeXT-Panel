@@ -19,7 +19,6 @@ use RedisException;
 use Slim\Http\Response;
 use Slim\Http\ServerRequest;
 use SmartyException;
-use voku\helper\AntiXSS;
 use function hash;
 use function hash_hmac;
 use function implode;
@@ -54,7 +53,7 @@ final class OAuthController extends BaseController
     public function slack(ServerRequest $request, Response $response, array $args): ResponseInterface
     {
         $user = $this->user;
-        $redis = Cache::initRedis();
+        $redis = (new Cache())->initRedis();
 
         if ($request->getParam('code') === null) {
             $state = Tools::genRandomChar(16);
@@ -108,7 +107,7 @@ final class OAuthController extends BaseController
 
         $slack_user_id = $id_token->claims()->get('https://slack.com/user_id');
 
-        if (User::where('im_type', 1)->where('im_value', $slack_user_id)->first() !== null ||
+        if ((new User())->where('im_type', 1)->where('im_value', $slack_user_id)->first() !== null ||
             ($user->im_type === 1 && $user->im_value === $slack_user_id)) {
             return ResponseHelper::error($response, 'Slack 账户已绑定');
         }
@@ -127,7 +126,7 @@ final class OAuthController extends BaseController
     public function discord(ServerRequest $request, Response $response, array $args): ResponseInterface
     {
         $user = $this->user;
-        $redis = Cache::initRedis();
+        $redis = (new Cache())->initRedis();
 
         if ($request->getParam('code') === null) {
             $state = Tools::genRandomChar(16);
@@ -193,7 +192,7 @@ final class OAuthController extends BaseController
 
         $discord_user_id = json_decode($user_response->getBody()->getContents(), true)['id'];
 
-        if (User::where('im_type', 2)->where('im_value', $discord_user_id)->first() !== null ||
+        if ((new User())->where('im_type', 2)->where('im_value', $discord_user_id)->first() !== null ||
             ($user->im_type === 2 && $user->im_value === $discord_user_id)) {
             return ResponseHelper::error($response, 'Discord 账户已绑定');
         }
@@ -245,12 +244,10 @@ final class OAuthController extends BaseController
             return ResponseHelper::error($response, self::$err_msg);
         }
 
-        $antiXss = new AntiXSS();
-
-        $telegram_id = $antiXss->xss_clean($user_auth['id']);
+        $telegram_id = $this->antiXss->xss_clean($user_auth['id']);
         $user = $this->user;
 
-        if (User::where('im_type', 4)->where('im_value', $telegram_id)->first() !== null ||
+        if ((new User())->where('im_type', 4)->where('im_value', $telegram_id)->first() !== null ||
             ($user->im_type === 4 && $user->im_value === $telegram_id)) {
             return ResponseHelper::error($response, 'Telegram 账户已绑定');
         }

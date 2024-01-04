@@ -1,7 +1,5 @@
 {include file='user/header.tpl'}
 
-<script src="//{$config['jsdelivr_url']}/npm/clipboard@latest/dist/clipboard.min.js"></script>
-
 <div class="page-wrapper">
     <div class="container-xl">
         <div class="page-header d-print-none text-white">
@@ -135,14 +133,12 @@
                                     &nbsp;通用订阅
                                 </a>
                             </li>
-                            {if $public_setting['enable_traditional_sub']}
-                                <li class="nav-item">
-                                    <a href="#traditional-sub" class="nav-link" data-bs-toggle="tab">
-                                        <i class="ti ti-rss icon"></i>
-                                        &nbsp;传统订阅
-                                    </a>
-                                </li>
-                            {/if}
+                            <li class="nav-item">
+                                <a href="#client-sub" class="nav-link" data-bs-toggle="tab">
+                                    <i class="ti ti-rss icon"></i>
+                                    &nbsp;客户端订阅
+                                </a>
+                            </li>
                             <li class="nav-item">
                                 <a href="#windows" class="nav-link" data-bs-toggle="tab">
                                     <i class="ti ti-brand-windows icon"></i>
@@ -193,6 +189,9 @@
                                         <p>
                                             通用订阅（sing-box）：<code>{$UniversalSub}/singbox</code>
                                         </p>
+                                        <p>
+                                            通用订阅（v2rayjson）：<code>{$UniversalSub}/v2rayjson</code>
+                                        </p>
                                         {if $public_setting['enable_ss_sub']}
                                             <p>
                                                 通用订阅（sip008）：<code>{$UniversalSub}/sip008</code>
@@ -211,6 +210,10 @@
                                                class="copy btn btn-primary">
                                                 复制通用订阅（sing-box）
                                             </a>
+                                            <a data-clipboard-text="{$UniversalSub}/v2rayjson"
+                                               class="copy btn btn-primary">
+                                                复制通用订阅（v2rayjson）
+                                            </a>
                                             {if $public_setting['enable_ss_sub']}
                                                 <a data-clipboard-text="{$UniversalSub}/sip008"
                                                    class="copy btn btn-primary">
@@ -220,53 +223,51 @@
                                         </div>
                                     </div>
                                 </div>
-                                {if $public_setting['enable_traditional_sub']}
-                                    <div class="tab-pane show" id="traditional-sub">
-                                        <div>
+                                <div class="tab-pane show" id="client-sub">
+                                    <div>
+                                        {if $public_setting['enable_ss_sub']}
+                                            <p>
+                                                客户端订阅（Shadowsocks）：<code>{$UniversalSub}/ss</code></p>
+                                            <p>
+                                                客户端订阅（SIP002）：<code>{$UniversalSub}/sip002</code>
+                                            </p>
+                                        {/if}
+                                        {if $public_setting['enable_v2_sub']}
+                                            <p>
+                                                客户端订阅（V2Ray）：<code>{$UniversalSub}/v2ray</code>
+                                            </p>
+                                        {/if}
+                                        {if $public_setting['enable_trojan_sub']}
+                                            <p>
+                                                客户端订阅（Trojan）：<code>{$UniversalSub}/trojan</code>
+                                            </p>
+                                        {/if}
+                                        <div class="btn-list justify-content-start">
                                             {if $public_setting['enable_ss_sub']}
-                                                <p>
-                                                    传统订阅（Shadowsocks）：<code>{$TraditionalSub}?ss=1</code></p>
-                                                <p>
-                                                    传统订阅（Shadowsocks SIP002）：<code>{$TraditionalSub}?sip002=1</code>
-                                                </p>
+                                                <a data-clipboard-text="{$UniversalSub}/ss"
+                                                   class="copy btn btn-primary">
+                                                    复制客户端订阅（Shadowsocks）
+                                                </a>
+                                                <a data-clipboard-text="{$UniversalSub}/sip002"
+                                                   class="copy btn btn-primary">
+                                                    复制客户端订阅（SIP002）
+                                                </a>
                                             {/if}
                                             {if $public_setting['enable_v2_sub']}
-                                                <p>
-                                                    传统订阅（V2Ray）：<code>{$TraditionalSub}?v2ray=1</code>
-                                                </p>
+                                                <a data-clipboard-text="{$UniversalSub}/v2ray"
+                                                   class="copy btn btn-primary">
+                                                    复制客户端订阅（V2Ray）
+                                                </a>
                                             {/if}
                                             {if $public_setting['enable_trojan_sub']}
-                                                <p>
-                                                    传统订阅（Trojan）：<code>{$TraditionalSub}?trojan=1</code>
-                                                </p>
+                                                <a data-clipboard-text="{$UniversalSub}/trojan"
+                                                   class="copy btn btn-primary">
+                                                    复制客户端订阅（Trojan）
+                                                </a>
                                             {/if}
-                                            <div class="btn-list justify-content-start">
-                                                {if $public_setting['enable_ss_sub']}
-                                                    <a data-clipboard-text="{$TraditionalSub}?ss=1"
-                                                       class="copy btn btn-primary">
-                                                        复制传统订阅（Shadowsocks）
-                                                    </a>
-                                                    <a data-clipboard-text="{$TraditionalSub}?sip002=1"
-                                                       class="copy btn btn-primary">
-                                                        复制传统订阅（Shadowsocks SIP002）
-                                                    </a>
-                                                {/if}
-                                                {if $public_setting['enable_v2_sub']}
-                                                    <a data-clipboard-text="{$TraditionalSub}?v2ray=1"
-                                                       class="copy btn btn-primary">
-                                                        复制传统订阅（V2Ray）
-                                                    </a>
-                                                {/if}
-                                                {if $public_setting['enable_trojan_sub']}
-                                                    <a data-clipboard-text="{$TraditionalSub}?trojan=1"
-                                                       class="copy btn btn-primary">
-                                                        复制传统订阅（Trojan）
-                                                    </a>
-                                                {/if}
-                                            </div>
                                         </div>
                                     </div>
-                                {/if}
+                                </div>
                                 <div class="tab-pane" id="windows">
                                     <div>
                                         <p>
@@ -274,11 +275,11 @@
                                         </p>
                                         <div class="btn-list justify-content-start">
                                             <a
-                                                    {if $config['enable_r2_client_download']}
-                                                        href="/user/clients/Clash.Verge.exe"
-                                                    {else}
-                                                        href="/clients/Clash.Verge.exe"
-                                                    {/if} class="btn btn-azure">
+                                                {if $config['enable_r2_client_download']}
+                                                    href="/user/clients/Clash.Verge.exe"
+                                                {else}
+                                                    href="/clients/Clash.Verge.exe"
+                                                {/if} class="btn btn-azure">
                                                 下载 Clash Verge
                                             </a>
                                             <a data-clipboard-text="{$UniversalSub}/clash"
@@ -343,11 +344,11 @@
                                     </p>
                                     <div class="btn-list justify-content-start">
                                         <a {if $config['enable_r2_client_download']}
-                                            href="/user/clients/Clash-Android.apk"
+                                            href="/user/clients/CMFA.apk"
                                         {else}
-                                            href="/clients/Clash-Android.apk"
+                                            href="/clients/CMFA.apk"
                                         {/if} class="btn btn-azure">
-                                            下载 Clash for Android
+                                            下载 Clash.Meta For Android
                                         </a>
                                         <a data-clipboard-text="{$UniversalSub}/clash"
                                            class="copy btn btn-primary">
@@ -553,7 +554,7 @@
                                     {/if}
                                 </p>
                                 <p>
-                                    上次签到时间：<code>{$user->lastCheckInTime()}</code>
+                                    上次签到时间：<code id="last-checkin-time">{$user->lastCheckInTime()}</code>
                                 </p>
                             </div>
                             <div class="card-footer">
@@ -562,19 +563,7 @@
                                         <button id="check-in" class="btn btn-primary ms-auto" disabled>已签到</button>
                                     {else}
                                         {if $public_setting['enable_checkin_captcha']}
-                                            {if $public_setting['captcha_provider'] === 'turnstile'}
-                                                <div id="cf-turnstile" class="cf-turnstile"
-                                                     data-sitekey="{$captcha['turnstile_sitekey']}"
-                                                        {if $user->is_dark_mode}
-                                                            data-theme="dark"
-                                                        {else}
-                                                            data-theme="light"
-                                                        {/if}
-                                                ></div>
-                                            {/if}
-                                            {if $public_setting['captcha_provider'] === 'geetest'}
-                                                <div id="geetest"></div>
-                                            {/if}
+                                            {include file='captcha_div.tpl'}
                                         {/if}
                                         <button id="check-in" class="btn btn-primary ms-auto"
                                                 hx-post="/user/checkin" hx-swap="none"
@@ -596,34 +585,8 @@
         </div>
     </div>
 
-    <script>
-        let clipboard = new ClipboardJS('.copy');
-        clipboard.on('success', function (e) {
-            $('#success-message').text('已复制到剪切板');
-            $('#success-dialog').modal('show');
-        });
-    </script>
-
     {if $public_setting['enable_checkin_captcha'] && $user->isAbleToCheckin()}
-    {if $public_setting['captcha_provider'] === 'turnstile'}
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        {include file='captcha_js.tpl'}
     {/if}
-    {if $public_setting['captcha_provider'] === 'geetest'}
-        <script src="https://static.geetest.com/v4/gt4.js"></script>
-        <script>
-            let geetest_result = '';
-            initGeetest4({
-                captchaId: '{$captcha['geetest_id']}',
-                product: 'float',
-                language: "zho",
-                riskType: 'slide'
-            }, function (geetest) {
-                geetest.appendTo("#geetest");
-                geetest.onSuccess(function () {
-                    geetest_result = geetest.getValidate();
-                });
-            });
-        </script>
-    {/if}
-    {/if}
+
     {include file='user/footer.tpl'}
