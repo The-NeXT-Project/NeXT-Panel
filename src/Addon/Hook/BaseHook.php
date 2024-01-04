@@ -1,11 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Addon\Hook;
 
 abstract class BaseHook
 {
     protected static $instances = array();
     protected function __construct()
+    {
+    }
+    private function __clone()
+    {
+    }
+    public function __wakeup():void
     {
     }
 
@@ -24,12 +32,6 @@ abstract class BaseHook
         }
 
         return $instances[$calledClass];
-    }
-    private function __clone()
-    {
-    }
-    public function __wakeup():void
-    {
     }
     abstract public function addhook($hook);
     abstract public function runhook();

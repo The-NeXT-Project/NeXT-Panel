@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Addon;
 
-class AddonManager
+final class AddonManager
 {
+    public array $addon_array = [];
     private static $instance;
     private function __construct()
     {
@@ -13,16 +14,15 @@ class AddonManager
     private function __clone()
     {
     }
-    static public function getInstance()
+    public static function getInstance()
     {
         if (! self::$instance instanceof self) {
             self::$instance = new self();
         }
         return self::$instance;
     }
-    public array $addon_array = [];
 
-    public function loadAll()
+    public function loadAll(): void
     {
         $addon_dir = dirname(__DIR__, 2) . '/addon';
         $this->addon_array = [];
@@ -31,7 +31,8 @@ class AddonManager
             $entry_path = $addon_dir . '/' . $entry;
             if ($entry === '.' || $entry === '..') {
                 continue;
-            } else if (is_dir($entry_path)) {
+            }
+            if (is_dir($entry_path)) {
                 $this->addon_array[$entry] = $entry_path;
             }
         }
