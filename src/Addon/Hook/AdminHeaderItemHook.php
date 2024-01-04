@@ -10,7 +10,7 @@ final class AdminHeaderItemHook extends BaseHook
     private static $hooks = [];
     public function addhook($hook): void
     {
-        if (!is_null(self::$hooks)) {
+        if (! is_null(self::$hooks)) {
             self::$hooks = [];
         }
         array_push(self::$hooks, $hook);

@@ -6,14 +6,14 @@ namespace App\Addon\Hook;
 
 abstract class BaseHook
 {
-    protected static $instances = array();
+    protected static $instances = [];
     protected function __construct()
     {
     }
     private function __clone()
     {
     }
-    public function __wakeup():void
+    public function __wakeup(): void
     {
     }
 
