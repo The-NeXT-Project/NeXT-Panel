@@ -27,7 +27,7 @@ Boot::bootSentry();
 Boot::bootDb();
 
 $addon = AddonManager::getInstance();
-$addon -> load_all();
+$addon -> loadAll();
 
 $guzzle_factory = new HttpFactory();
 $response_factory = new DecoratedResponseFactory($guzzle_factory, $guzzle_factory);
