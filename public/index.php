@@ -14,20 +14,21 @@ require_once __DIR__ . '/../config/.config.php';
 require_once __DIR__ . '/../config/appprofile.php';
 require_once __DIR__ . '/../app/predefine.php';
 
+use App\Addon\AddonManager;
 use App\Middleware\ErrorHandler;
 use App\Services\Boot;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\ServerRequest;
 use Slim\Factory\AppFactory;
 use Slim\Http\Factory\DecoratedResponseFactory;
-use App\Addon\AddonManager;
+
 
 Boot::setTime();
 Boot::bootSentry();
 Boot::bootDb();
 
 $addon = AddonManager::getInstance();
-$addon -> loadAll();
+$addon->loadAll();
 
 $guzzle_factory = new HttpFactory();
 $response_factory = new DecoratedResponseFactory($guzzle_factory, $guzzle_factory);
