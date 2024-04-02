@@ -95,7 +95,7 @@ final class Epay extends Base
             'type' => $type,
             'out_trade_no' => $pl->tradeno,
             'notify_url' => $_ENV['baseUrl'] . '/payment/notify/epay',
-            'return_url' => 'https://' . $_ENV['baseUrl'] . '/user/payment/return/epay',
+            'return_url' => $_ENV['baseUrl'] . '/user/payment/return/epay',
             'name' => $pl->tradeno,
             'money' => $price,
             'sitename' => $_ENV['appName'],
