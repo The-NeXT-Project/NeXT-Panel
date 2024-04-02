@@ -19,15 +19,17 @@ use App\Services\Gateway\Epay\EpayTool;
 use App\Services\View;
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Response;
 use Slim\Http\ServerRequest;
 use voku\helper\AntiXSS;
+use function json_decode;
+use function trim;
 
 final class Epay extends Base
 {
     protected array $epay = [];
-    private static string $err_msg = '请求支付失败';
 
     public function __construct()
     {
@@ -93,7 +95,7 @@ final class Epay extends Base
             'type' => $type,
             'out_trade_no' => $pl->tradeno,
             'notify_url' => $_ENV['baseUrl'] . '/payment/notify/epay',
-            'return_url' => 'https://' . $_SERVER['HTTP_HOST'] . '/user/payment/return/epay',
+            'return_url' => 'https://' . $_ENV['baseUrl'] . '/user/payment/return/epay',
             'name' => $pl->tradeno,
             'money' => $price,
             'sitename' => $_ENV['appName'],
@@ -104,24 +106,28 @@ final class Epay extends Base
         $data['sign'] = $epaySubmit->buildRequestMysign(EpayTool::argSort($data));
         $data['sign_type'] = $this->epay['sign_type'];
         $client = new Client();
+
         try {
             $res = $client->request('POST', $this->epay['apiurl'] . 'mapi.php', ['form_params' => $data]);
+
             if ($res->getStatusCode() !== 200) {
-                throw new Exception(self::$err_msg);
+                throw new Exception();
             }
-            $resData = json_decode((string) $res->getBody(), true);
+
+            $resData = json_decode($res->getBody()->__toString(), true);
+
             if ($resData['code'] !== 1 || ! isset($resData['payurl'])) {
-                throw new Exception(self::$err_msg);
+                throw new Exception();
             }
-            return $response->withJson([
+
+            return $response->withHeader('HX-Redirect', $resData['payurl'])->withJson([
                 'ret' => 1,
-                'url' => $resData['payurl'],
                 'msg' => '订单发起成功，正在跳转到支付页面...',
             ]);
-        } catch (Exception) {
+        } catch (Exception|GuzzleException) {
             return $response->withJson([
                 'ret' => 0,
-                'msg' => self::$err_msg,
+                'msg' => '请求支付失败',
             ]);
         }
     }
