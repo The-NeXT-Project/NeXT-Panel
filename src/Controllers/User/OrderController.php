@@ -132,7 +132,7 @@ final class OrderController extends BaseController
         if ($user->is_shadow_banned) {
             return $response->withJson([
                 'ret' => 0,
-                'msg' => '您的账户已被封禁，无法购买商品',
+                'msg' => '商品不存在或库存不足',
             ]);
         }
 
