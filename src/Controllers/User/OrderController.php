@@ -112,7 +112,7 @@ final class OrderController extends BaseController
         );
     }
 
-    public function process(ServerRequest $request, Response $response, array $args): ResponseInterface
+    public function processProductOrder(ServerRequest $request, Response $response, array $args): ResponseInterface
     {
         $coupon_raw = $this->antiXss->xss_clean($request->getParam('coupon'));
         $product_id = $this->antiXss->xss_clean($request->getParam('product_id'));
@@ -244,6 +244,7 @@ final class OrderController extends BaseController
             'content_id' => 0,
             'name' => $product->name,
             'price' => $product->price,
+            'type' => 'product',
         ];
 
         if ($coupon_raw !== '') {
@@ -281,6 +282,71 @@ final class OrderController extends BaseController
             'msg' => '成功创建订单，正在跳转账单页面',
             'invoice_id' => $invoice->id,
         ]);
+    }
+
+    public function processTopupOrder(ServerRequest $request, Response $response, array $args): ResponseInterface
+    {
+        $amount = $this->antiXss->xss_clean($request->getParam('amount'));
+
+        $amount = is_numeric($amount) ? (float) $amount : null;
+        if ($amount === null || $amount <= 0 || Tools::getDecimalPlaces($amount) > 2) {
+            return $response->withJson([
+                'ret' => 0,
+                'msg' => '充值金额无效',
+            ]);
+        }
+
+        $order = new Order();
+        $order->user_id = $this->user->id;
+        $order->product_id = 0;
+        $order->product_type = 'topup';
+        $order->product_name = '余额充值';
+        $order->product_content = json_encode(['amount' => $amount]);
+        $order->coupon = '';
+        $order->price = $amount;
+        $order->status = 'pending_payment';
+        $order->create_time = time();
+        $order->update_time = time();
+        $order->save();
+
+        $invoice_content = [];
+
+        $invoice_content[] = [
+            'content_id' => 0,
+            'name' => '余额充值',
+            'price' => $amount,
+            'type' => 'topup',
+        ];
+
+        $invoice = new Invoice();
+        $invoice->user_id = $this->user->id;
+        $invoice->order_id = $order->id;
+        $invoice->content = json_encode($invoice_content);
+        $invoice->price = $amount;
+        $invoice->status = 'unpaid';
+        $invoice->create_time = time();
+        $invoice->update_time = time();
+        $invoice->pay_time = 0;
+        $invoice->save();
+
+        return $response->withHeader('HX-Redirect', '/user/invoice/'.$invoice->id.'/view')->withJson([
+            'ret' => 1,
+            'msg' => '成功创建订单，正在跳转账单页面',
+            'invoice_id' => $invoice->id,
+        ]);
+    }
+
+    public function process(ServerRequest $request, Response $response, array $args): ResponseInterface
+    {
+        $type = $this->antiXss->xss_clean($request->getParam('type'));
+        return match ($type) {
+            'product' => $this->processProductOrder($request, $response, $args),
+            'topup' => $this->processTopupOrder($request, $response, $args),
+            default => $response->withJson([
+                'ret' => 0,
+                'msg' => '未知订单类型',
+            ]),
+        };
     }
 
     public function ajax(ServerRequest $request, Response $response, array $args): ResponseInterface

@@ -68,11 +68,13 @@ final class InvoiceController extends BaseController
         $invoice->update_time = Tools::toDateTime($invoice->update_time);
         $invoice->pay_time = Tools::toDateTime($invoice->pay_time);
         $invoice_content = json_decode($invoice->content);
+        $invoice_type = $invoice_contenttype ?? 'product';
 
         return $response->write(
             $this->view()
                 ->assign('invoice', $invoice)
                 ->assign('invoice_content', $invoice_content)
+                ->assign('invoice_type', $invoice_type)
                 ->assign('paylist', $paylist)
                 ->assign('payments', Payment::getPaymentsEnabled())
                 ->fetch('user/invoice/view.tpl')
