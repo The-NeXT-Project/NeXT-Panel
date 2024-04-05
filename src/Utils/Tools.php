@@ -344,18 +344,4 @@ final class Tools
 
         return true;
     }
-
-    /**
-     * 判断小数点位数
-     *
-     * @param float $float
-     *
-     * @return int
-     */
-
-    public static function getDecimalPlaces(float $float): int
-    {
-        $parts = explode('.', (string) $float);
-        return isset($parts[1]) ? strlen($parts[1]) : 0;
-    }
 }

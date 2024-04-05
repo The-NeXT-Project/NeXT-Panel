@@ -288,8 +288,8 @@ final class OrderController extends BaseController
     {
         $amount = $this->antiXss->xss_clean($request->getParam('amount'));
 
-        $amount = is_numeric($amount) ? (float) $amount : null;
-        if ($amount === null || $amount <= 0 || Tools::getDecimalPlaces($amount) > 2) {
+        $amount = is_numeric($amount) ? round((float) $amount, 2) : null;
+        if ($amount === null || $amount <= 0) {
             return $response->withJson([
                 'ret' => 0,
                 'msg' => '充值金额无效',
