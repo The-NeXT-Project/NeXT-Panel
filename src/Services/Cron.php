@@ -253,6 +253,18 @@ final class Cron
                 ->where('product_type', 'tabp')
                 ->orderBy('id')
                 ->first();
+            // 如果用户账户中有已激活的TABP订单，则判断是否过期
+            if ($activated_order !== null) {
+                $content = json_decode($activated_order->product_content);
+
+                if ($activated_order->update_time + $content->time * 86400 < time()) {
+                    $activated_order->status = 'expired';
+                    $activated_order->update_time = time();
+                    $activated_order->save();
+                    echo "TABP订单 #{$activated_order->id} 已过期。\n";
+                    $activated_order = null; // 先检查过期，再激活新订单，避免服务中断
+                }
+            }
             // 如果用户账户中没有已激活的TABP订单，且有等待激活的TABP订单，则激活最早的等待激活TABP订单
             if ($activated_order === null && count($pending_activation_orders) > 0) {
                 $order = $pending_activation_orders[0];
@@ -275,18 +287,6 @@ final class Cron
                 $order->update_time = time();
                 $order->save();
                 echo "TABP订单 #{$order->id} 已激活。\n";
-                continue;
-            }
-            // 如果用户账户中有已激活的TABP订单，则判断是否过期
-            if ($activated_order !== null) {
-                $content = json_decode($activated_order->product_content);
-
-                if ($activated_order->update_time + $content->time * 86400 < time()) {
-                    $activated_order->status = 'expired';
-                    $activated_order->update_time = time();
-                    $activated_order->save();
-                    echo "TABP订单 #{$activated_order->id} 已过期。\n";
-                }
             }
         }
 
@@ -388,7 +388,8 @@ final class Cron
                 $user->money - $content->amount,
                 $user->money,
                 $content->amount,
-                "充值订单 #{$order->id}，金额：{$content->amount}");
+                "充值订单 #{$order->id}，金额：{$content->amount}"
+            );
             echo "充值订单 #{$order->id} 已激活。\n";
         }
         echo Tools::toDateTime(time()) . ' 充值订单激活处理完成' . PHP_EOL;

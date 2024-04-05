@@ -24,7 +24,7 @@
     <div class="page-body">
         <div class="container-xl">
             <div class="row row-cards">
-                {if $invoice->status === 'unpaid'}
+                {if $invoice->status === 'unpaid' || $invoice->status === 'partially_paid'}
                 <div class="col-sm-12 col-md-6 col-lg-9">
                     {else}
                     <div class="col-sm-12 col-md-12 col-lg-12">
@@ -94,7 +94,7 @@
                             </div>
                         </div>
                     </div>
-                    {if $invoice->status === 'unpaid'}
+                    {if $invoice->status === 'unpaid' || $invoice->status === 'partially_paid'}
                         <div class="col-sm-12 col-md-6 col-lg-3">
                             <div class="card">
                                 <div class="card-header">

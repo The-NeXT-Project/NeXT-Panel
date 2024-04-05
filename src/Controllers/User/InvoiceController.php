@@ -103,29 +103,48 @@ final class InvoiceController extends BaseController
             ]);
         }
 
-        if ($user->money < $invoice->price) {
+        // 账单是否包含充值
+        $invoice_content = json_decode($invoice->content);
+        foreach ($invoice_content as $item) {
+            if ($item->type === 'topup') {
+                return $response->withJson([
+                    'ret' => 0,
+                    'msg' => '该账单不支持使用余额支付',
+                ]);
+            }
+        }
+
+        // 组合支付
+        if ($user->money > 0) {
+            $money_before = $user->money;
+            if ($user->money >= $invoice->price) {
+                $paid = $invoice->price;
+                $invoice->status = 'paid_balance';
+            } else {
+                $paid = $user->money;
+                $invoice->status = 'partially_paid';
+                $invoice->price -= $paid;
+            }
+            $user->money -= $paid;
+            $user->save();
+
+            (new UserMoneyLog())->add(
+                $user->id,
+                $money_before,
+                (float) $user->money,
+                -$paid,
+                '支付账单 #' . $invoice->id
+            );
+
+            $invoice->update_time = time();
+            $invoice->pay_time = time();
+            $invoice->save();
+        } else {
             return $response->withJson([
                 'ret' => 0,
                 'msg' => '余额不足',
             ]);
         }
-
-        $money_before = $user->money;
-        $user->money -= $invoice->price;
-        $user->save();
-
-        (new UserMoneyLog())->add(
-            $user->id,
-            $money_before,
-            (float) $user->money,
-            -$invoice->price,
-            '支付账单 #' . $invoice->id
-        );
-
-        $invoice->status = 'paid_balance';
-        $invoice->update_time = time();
-        $invoice->pay_time = time();
-        $invoice->save();
 
         return $response->withJson([
             'ret' => 1,

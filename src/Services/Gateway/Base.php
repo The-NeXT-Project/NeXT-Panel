@@ -71,7 +71,7 @@ abstract class Base
 
         $invoice = (new Invoice())->where('id', $paylist?->invoice_id)->first();
 
-        if ($invoice?->status === 'unpaid' && (int) $invoice?->price === (int) $paylist?->total) {
+        if (($invoice?->status === 'unpaid' || $invoice?->status === 'partially_paid') && (int) $invoice?->price === (int) $paylist?->total) {
             $invoice->status = 'paid_gateway';
             $invoice->update_time = time();
             $invoice->pay_time = time();

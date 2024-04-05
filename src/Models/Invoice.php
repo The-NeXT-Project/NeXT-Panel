@@ -40,6 +40,7 @@ final class Invoice extends Model
             'paid_admin' => '已支付（管理员）',
             'cancelled' => '已取消',
             'refunded_balance' => '已退款（账户余额）',
+            'partially_paid' => '部分支付',
             default => '未知',
         };
     }
