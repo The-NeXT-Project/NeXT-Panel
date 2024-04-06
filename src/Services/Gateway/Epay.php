@@ -120,7 +120,7 @@ final class Epay extends Base
             if ($resData['code'] !== 1 || ! isset($resData['payurl'])) {
                 return $response->withJson([
                     'ret' => 0,
-                    'msg' => $resData['msg']??'请求支付失败',
+                    'msg' => $resData['msg'] ?? '请求支付失败',
                 ]);
             }
 

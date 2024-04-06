@@ -83,15 +83,12 @@ abstract class Base
         $user = (new User())->find($paylist?->userid);
         switch ($invoice?->type) {
             case 'product':
-            {
                 // 返利
                 if ($user !== null && $user->ref_by > 0 && Config::obtain('invite_mode') === 'reward') {
                     Reward::issuePaybackReward($user->id, $user->ref_by, $paylist->total, $paylist->invoice_id);
                 }
                 break;
-            }
             case 'topup':
-            {
                 // 激活充值订单
                 $user->money += $paylist->total;
                 $user->save();
@@ -108,11 +105,8 @@ abstract class Base
                     "充值订单 #{$order->id}，金额：{$content->amount}"
                 );
                 break;
-            }
             default:
-            {
                 break;
-            }
         }
     }
 
