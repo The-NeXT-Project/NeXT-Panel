@@ -173,6 +173,12 @@ final class Clash extends Base
             $nodes[] = $node;
 
             foreach ($clash_group_indexes as $index) {
+                if (isset($clash_group_config['proxy-groups'][$index]['filter'])) {
+                    // 通过正则表达式过滤节点
+                    if (! preg_match($clash_group_config['proxy-groups'][$index]['filter'], $node_raw->name)) {
+                        continue;
+                    }
+                }
                 $clash_group_config['proxy-groups'][$index]['proxies'][] = $node_raw->name;
             }
         }
