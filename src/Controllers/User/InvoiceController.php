@@ -68,13 +68,11 @@ final class InvoiceController extends BaseController
         $invoice->update_time = Tools::toDateTime($invoice->update_time);
         $invoice->pay_time = Tools::toDateTime($invoice->pay_time);
         $invoice_content = json_decode($invoice->content);
-        $invoice_type = $invoice_contenttype ?? 'product';
 
         return $response->write(
             $this->view()
                 ->assign('invoice', $invoice)
                 ->assign('invoice_content', $invoice_content)
-                ->assign('invoice_type', $invoice_type)
                 ->assign('paylist', $paylist)
                 ->assign('payments', Payment::getPaymentsEnabled())
                 ->fetch('user/invoice/view.tpl')
@@ -103,15 +101,12 @@ final class InvoiceController extends BaseController
             ]);
         }
 
-        // 账单是否包含充值
-        $invoice_content = json_decode($invoice->content);
-        foreach ($invoice_content as $item) {
-            if ($item->type === 'topup') {
-                return $response->withJson([
-                    'ret' => 0,
-                    'msg' => '该账单不支持使用余额支付',
-                ]);
-            }
+        // 账单是否为充值
+        if ($invoice->type === 'topup') {
+            return $response->withJson([
+                'ret' => 0,
+                'msg' => '该账单不支持使用余额支付',
+            ]);
         }
 
         // 组合支付

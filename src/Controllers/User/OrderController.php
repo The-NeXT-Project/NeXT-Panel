@@ -244,7 +244,6 @@ final class OrderController extends BaseController
             'content_id' => 0,
             'name' => $product->name,
             'price' => $product->price,
-            'type' => 'product',
         ];
 
         if ($coupon_raw !== '') {
@@ -264,6 +263,7 @@ final class OrderController extends BaseController
         $invoice->create_time = time();
         $invoice->update_time = time();
         $invoice->pay_time = 0;
+        $invoice->type = 'product';
         $invoice->save();
 
         if ($product->stock > 0) {
@@ -315,7 +315,6 @@ final class OrderController extends BaseController
             'content_id' => 0,
             'name' => '余额充值',
             'price' => $amount,
-            'type' => 'topup',
         ];
 
         $invoice = new Invoice();
@@ -327,6 +326,7 @@ final class OrderController extends BaseController
         $invoice->create_time = time();
         $invoice->update_time = time();
         $invoice->pay_time = 0;
+        $invoice->type = 'topup';
         $invoice->save();
 
         return $response->withHeader('HX-Redirect', '/user/invoice/'.$invoice->id.'/view')->withJson([

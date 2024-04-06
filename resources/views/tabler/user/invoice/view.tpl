@@ -96,6 +96,7 @@
                     </div>
                     {if $invoice->status === 'unpaid' || $invoice->status === 'partially_paid'}
                         <div class="col-sm-12 col-md-6 col-lg-3">
+                            {if $invoice->type !== 'topup'}
                             <div class="card">
                                 <div class="card-header">
                                     <h3 class="card-title">余额支付</h3>
@@ -111,6 +112,7 @@
                                     </div>
                                 </div>
                             </div>
+                            {/if}
                             {if count($payments) > 0}
                                 <div class="card my-3">
                                     <div class="card-header">
@@ -133,6 +135,7 @@
         </div>
 
         <script>
+            {if $invoice->type !== 'topup'}
             $("#pay-balance").click(function () {
                 $.ajax({
                     url: '/user/invoice/pay_balance',
@@ -155,6 +158,7 @@
                     }
                 })
             });
+            {/if}
         </script>
 
         {include file='user/footer.tpl'}
