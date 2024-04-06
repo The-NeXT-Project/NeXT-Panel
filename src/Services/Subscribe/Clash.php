@@ -182,6 +182,11 @@ final class Clash extends Base
                 $clash_group_config['proxy-groups'][$index]['proxies'][] = $node_raw->name;
             }
         }
+        foreach ($clash_group_indexes as $index) {
+            if (isset($clash_group_config['proxy-groups'][$index]['filter'])) {
+                unset($clash_group_config['proxy-groups'][$index]['filter']);
+            }
+        }
 
         $clash_nodes = [
             'proxies' => $nodes,
