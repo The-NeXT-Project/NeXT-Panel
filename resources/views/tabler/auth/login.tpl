@@ -46,7 +46,7 @@
                     </div>
                 </div>
                 <div class="form-footer">
-                    <button class="btn btn-primary w-100"
+                    <button class="btn btn-primary w-100 mb-3"
                             hx-post="/auth/login" hx-swap="none" hx-vals='js:{
                                 {if $public_setting['enable_login_captcha']}
                                     {include file='captcha/ajax.tpl'}

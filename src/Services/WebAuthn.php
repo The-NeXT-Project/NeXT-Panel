@@ -96,7 +96,7 @@ final class WebAuthn
         } catch (Exception $e) {
             return ['ret' => 0, 'msg' => $e->getMessage()];
         }
-        if (! $publicKeyCredential->response instanceof AuthenticatorAttestationResponse) {
+        if (! isset($publicKeyCredential->response) || ! $publicKeyCredential->response instanceof AuthenticatorAttestationResponse) {
             return ['ret' => 0, 'msg' => '密钥类型错误'];
         }
 
@@ -177,7 +177,7 @@ final class WebAuthn
     {
         $serializer = self::getSerializer();
         $publicKeyCredential = $serializer->deserialize(json_encode($data), PublicKeyCredential::class, 'json');
-        if (! $publicKeyCredential->response instanceof AuthenticatorAssertionResponse) {
+        if (! isset($publicKeyCredential->response) || ! $publicKeyCredential->response instanceof AuthenticatorAssertionResponse) {
             return ['ret' => 0, 'msg' => '验证失败'];
         }
         $publicKeyCredentialSource = (new WebAuthnDevice())->where('rawid', $publicKeyCredential->id)->first();
