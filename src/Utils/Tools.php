@@ -344,4 +344,9 @@ final class Tools
 
         return true;
     }
+
+    public static function getSiteDomain(): string
+    {
+        return parse_url($_ENV['baseUrl'], PHP_URL_HOST);
+    }
 }

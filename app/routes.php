@@ -71,6 +71,9 @@ return static function (Slim\App $app): void {
         $group->post('/contact_method', App\Controllers\User\InfoController::class . ':updateContactMethod');
         $group->post('/theme', App\Controllers\User\InfoController::class . ':updateTheme');
         $group->post('/kill', App\Controllers\User\InfoController::class . ':sendToGulag');
+        $group->get('/webauthn_reg', App\Controllers\User\WebAuthnController::class . ':requestRegister');
+        $group->post('/webauthn_reg', App\Controllers\User\WebAuthnController::class . ':registerHandler');
+        $group->delete('/webauthn_reg/{id:[0-9]+}', App\Controllers\User\WebAuthnController::class . ':deleteDevice');
         // 发送验证邮件
         $group->post('/send', App\Controllers\AuthController::class . ':sendVerify');
         // MFA
@@ -121,6 +124,8 @@ return static function (Slim\App $app): void {
     $app->group('/auth', static function (RouteCollectorProxy $group): void {
         $group->get('/login', App\Controllers\AuthController::class . ':login');
         $group->post('/login', App\Controllers\AuthController::class . ':loginHandle');
+        $group->get('/webauthn_request', App\Controllers\AuthController::class . ':webauthnRequest');
+        $group->post('/webauthn_verify', App\Controllers\AuthController::class . ':webauthnHandle');
         $group->get('/register', App\Controllers\AuthController::class . ':register');
         $group->post('/register', App\Controllers\AuthController::class . ':registerHandle');
         $group->post('/send', App\Controllers\AuthController::class . ':sendVerify');

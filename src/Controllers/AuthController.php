@@ -16,6 +16,7 @@ use App\Services\Mail;
 use App\Services\MFA;
 use App\Services\RateLimit;
 use App\Services\Reward;
+use App\Services\WebAuthn;
 use App\Utils\Cookie;
 use App\Utils\Hash;
 use App\Utils\ResponseHelper;
@@ -369,5 +370,42 @@ final class AuthController extends BaseController
 
         return $response->withStatus(302)
             ->withHeader('Location', '/auth/login');
+    }
+
+    public function webauthnRequest(ServerRequest $request, Response $response, $next): ResponseInterface
+    {
+        return $response->withJson(WebAuthn::challengeRequest());
+    }
+
+    public function webauthnHandle(ServerRequest $request, Response $response, $next): ResponseInterface
+    {
+        $data = $this->antiXss->xss_clean((array) $request->getParsedBody());
+        $redir = $this->antiXss->xss_clean(Cookie::get('redir')) ?? '/user';
+        $result = WebAuthn::challengeHandle($data);
+        if ($result['ret'] === 1) {
+            $user = (new User())->where('id', $result['userid'])->first();
+            if ($user === null) {
+                return $response->withJson([
+                    'ret' => 0,
+                    'msg' => '用户不存在',
+                ]);
+            }
+            $time = 3600;
+            $rememberMe = $request->getParam('remember_me') === 'true' ? 1 : 0;
+            if ($rememberMe) {
+                $time = 86400 * ($_ENV['rememberMeDuration'] ?: 7);
+            }
+            Auth::login($user->id, $time);
+            $loginIp = new LoginIp();
+            $loginIp->collectLoginIP($_SERVER['REMOTE_ADDR'], 0, $user->id);
+            $user->last_login_time = time();
+            $user->save();
+            return $response->withJson([
+                'ret' => 1,
+                'msg' => '登录成功',
+                'redir' => $redir,
+            ]);
+        }
+        return $response->withJson($result);
     }
 }

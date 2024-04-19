@@ -253,6 +253,7 @@ final class User extends Model
         (new Link())->where('userid', $uid)->delete();
         (new LoginIp())->where('userid', $uid)->delete();
         (new SubscribeLog())->where('user_id', $uid)->delete();
+        (new WebAuthnDevice())->where('userid', $uid)->delete();
 
         return $this->delete();
     }

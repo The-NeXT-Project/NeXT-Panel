@@ -43,7 +43,8 @@
         "tronovav/geoip2-update": "^2",
         "twig/twig": "^3",
         "vectorface/googleauthenticator": "^3",
-        "voku/anti-xss": "^4"
+        "voku/anti-xss": "^4",
+        "web-auth/webauthn-framework": "^4.8"
     },
     "autoload": {
         "psr-4": {

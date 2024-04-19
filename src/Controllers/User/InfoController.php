@@ -7,6 +7,7 @@ namespace App\Controllers\User;
 use App\Controllers\BaseController;
 use App\Models\Config;
 use App\Models\User;
+use App\Models\WebAuthnDevice;
 use App\Services\Auth;
 use App\Services\Cache;
 use App\Services\Filter;
@@ -35,12 +36,14 @@ final class InfoController extends BaseController
         $themes = Tools::getDir(BASE_PATH . '/resources/views');
         $methods = Tools::getSsMethod('method');
         $ga_url = MFA::getGaUrl($this->user);
+        $webauthn_devices = (new WebAuthnDevice())->where('userid', $this->user->id)->get();
 
         return $response->write($this->view()
             ->assign('user', $this->user)
             ->assign('themes', $themes)
             ->assign('methods', $methods)
             ->assign('ga_url', $ga_url)
+            ->assign('webauthn_devices', $webauthn_devices)
             ->fetch('user/edit.tpl'));
     }
 
@@ -61,7 +64,7 @@ final class InfoController extends BaseController
             return ResponseHelper::error($response, '未填写邮箱');
         }
 
-        $email_check = Filter::checkEmailFilter($email);
+        $email_check = Filter::checkEmailFilter($new_email);
 
         if (! $email_check) {
             return ResponseHelper::error($response, '无效的邮箱');
