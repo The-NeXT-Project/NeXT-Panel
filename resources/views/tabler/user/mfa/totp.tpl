@@ -1,4 +1,4 @@
-<div class="col-sm-12 col-md-6">
+<div class="col-sm-12 col-md-12">
     <div class="card">
         <div class="card-body">
             <h3 class="card-title">TOTP
@@ -29,8 +29,8 @@
         <div class="card-footer">
             {if $totp_devices}
                 <button class="btn btn-red ms-auto"
-                    hx-delete="/user/totp_reg"
-                    hx-swap="none">
+                        hx-delete="/user/totp_reg"
+                        hx-swap="none">
                     禁用
                 </button>
             {else}

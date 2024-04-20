@@ -7,7 +7,6 @@ namespace App\Controllers;
 use App\Models\Config;
 use App\Models\InviteCode;
 use App\Models\LoginIp;
-use App\Models\MFACredential;
 use App\Models\User;
 use App\Services\Auth;
 use App\Services\Cache;
@@ -429,7 +428,7 @@ final class AuthController extends BaseController
             ]);
         }
         $login_session = json_decode($login_session, true);
-        return $response->withJson(MFA\FIDO::fidoAssertRequest($login_session['userid']));
+        return $response->withJson(MFA\FIDO::fidoAssertRequest((new User())->where('id', $login_session['userid'])->first()));
     }
 
     public function mfaFidoAssert(ServerRequest $request, Response $response, $next): ResponseInterface
@@ -444,14 +443,15 @@ final class AuthController extends BaseController
             ]);
         }
         $login_session = json_decode($login_session, true);
-        $result = MFA\FIDO::fidoAssertHandle($login_session['userid'], $data);
+        $result = MFA\FIDO::fidoAssertHandle((new User())->where('id', $login_session['userid'])->first(), $data);
         $redir = $this->antiXss->xss_clean(Cookie::get('redir')) ?? '/user';
         if ($result['ret'] === 1) {
             $cache->del('login_session:' . session_id());
             Auth::login($login_session['userid'], $login_session['remember_time']);
-            return $response->withHeader('HX-Redirect', $redir)->withJson([
+            return $response->withJson([
                 'ret' => 1,
                 'msg' => '登录成功',
+                'redir' => $redir
             ]);
         }
         return $response->withJson($result);

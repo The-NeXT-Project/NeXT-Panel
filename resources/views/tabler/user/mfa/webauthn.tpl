@@ -1,5 +1,3 @@
-<script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
-
 <div class="col-sm-12 col-md-12">
     <div class="card">
         <div class="card-body">
@@ -28,7 +26,7 @@
         <div class="card-footer">
             <div class="d-flex">
                 <button class="btn btn-primary ms-auto" id="webauthnReg">
-                    注册 Passkeys设备
+                    注册 Passkeys 设备
                 </button>
             </div>
         </div>
@@ -36,7 +34,6 @@
 </div>
 {literal}
     <script>
-        const {startRegistration} = SimpleWebAuthnBrowser;
         document.getElementById('webauthnReg').addEventListener('click', async () => {
             const resp = await fetch('/user/webauthn_reg');
             let attResp;

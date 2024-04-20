@@ -6,7 +6,6 @@ namespace App\Services\MFA;
 
 use App\Models\MFACredential;
 use App\Models\User;
-use App\Models\WebAuthnDevice;
 use App\Services\Cache;
 use App\Utils\Tools;
 use Exception;
@@ -21,10 +20,10 @@ use Webauthn\PublicKeyCredentialSource;
 
 final class FIDO
 {
-    public static function fidoRegisterRequest(User $user): string
+    public static function fidoRegisterRequest(User $user): PublicKeyCredentialCreationOptions
     {
         $rpEntity = WebAuthn::generateRPEntity();
-        $userEntity =  WebAuthn::generateUserEntity($user);
+        $userEntity = WebAuthn::generateUserEntity($user);
         $authenticatorSelectionCriteria = AuthenticatorSelectionCriteria::create();
         $publicKeyCredentialCreationOptions =
             PublicKeyCredentialCreationOptions::create(
@@ -36,10 +35,9 @@ final class FIDO
                 attestation: PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE,
                 timeout: WebAuthn::$timeout,
             );
-        $json_options = json_encode($publicKeyCredentialCreationOptions);
         $redis = (new Cache())->initRedis();
-        $redis->setex('fido_register:' . session_id(), 300, $json_options);
-        return $json_options;
+        $redis->setex('fido_register:' . session_id(), 300, json_encode($publicKeyCredentialCreationOptions));
+        return $publicKeyCredentialCreationOptions;
     }
 
     public static function fidoRegisterHandle(User $user, array $data): array
@@ -82,16 +80,16 @@ final class FIDO
         $mfaCredential->body = json_encode($publicKeyCredentialSource);
         $mfaCredential->created_at = date('Y-m-d H:i:s');
         $mfaCredential->used_at = null;
-        $mfaCredential->name = $data['name'] === '' ? $data['name'] : null;
+        $mfaCredential->name = $data['name'] === '' ? null : $data['name'];
         $mfaCredential->type = 'fido';
         $mfaCredential->save();
         return ['ret' => 1, 'msg' => '注册成功'];
     }
 
-    public static function fidoAssertRequest(User $user): string
+    public static function fidoAssertRequest(User $user): PublicKeyCredentialRequestOptions
     {
         $serializer = WebAuthn::getSerializer();
-        $userCredentials = (new MFACredential())->where('id', $user->id)->where('type','fido')->get(['body']);
+        $userCredentials = (new MFACredential())->where('userid', $user->id)->where('type', 'fido')->get(['body']);
         $credentials = [];
         foreach ($userCredentials as $credential) {
             $credentials[] = $serializer->deserialize($credential->body, PublicKeyCredentialSource::class, 'json');
@@ -106,13 +104,12 @@ final class FIDO
             random_bytes(32),
             rpId: Tools::getSiteDomain(),
             allowCredentials: $allowedCredentials,
-            userVerification: PublicKeyCredentialRequestOptions::USER_VERIFICATION_REQUIREMENT_REQUIRED,
+            userVerification: 'discouraged',
             timeout: WebAuthn::$timeout,
         );
-        $json_response = json_encode($publicKeyCredentialRequestOptions);
         $redis = (new Cache())->initRedis();
-        $redis->setex('fido_assertion:' . session_id(), 300, $json_response);
-        return $json_response;
+        $redis->setex('fido_assertion:' . session_id(), 300, json_encode($publicKeyCredentialRequestOptions));
+        return $publicKeyCredentialRequestOptions;
     }
 
     public static function fidoAssertHandle(User $user, array $data): array
@@ -129,7 +126,7 @@ final class FIDO
         try {
             $redis = (new Cache())->initRedis();
             $publicKeyCredentialRequestOptions = $serializer->deserialize(
-                $redis->get('webauthn_assertion:' . session_id()),
+                $redis->get('fido_assertion:' . session_id()),
                 PublicKeyCredentialRequestOptions::class,
                 'json'
             );
@@ -144,7 +141,7 @@ final class FIDO
                 [Tools::getSiteDomain()]
             );
         } catch (Exception $e) {
-            return ['ret' => 0, 'msg' => $e->getMessage()];
+            return ['ret' => 0, 'msg' => '111' . $e->getMessage()];
         }
         $publicKeyCredentialSource->body = json_encode($result);
         $publicKeyCredentialSource->used_at = date('Y-m-d H:i:s');

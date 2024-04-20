@@ -28,16 +28,21 @@ final class TOTP
         }
     }
 
+    public static function getGaUrl(User $user, string $token): string
+    {
+        return 'otpauth://totp/' . $_ENV['appName'] . ':' . rawurlencode($user->email) . '?secret=' . $token . '&issuer=' . rawurlencode($_ENV['appName']);
+    }
+
     public static function totpRegisterHandle(User $user, string $code): array
     {
         $redis = (new Cache())->initRedis();
         $token = $redis->get('totp_register:' . session_id());
         if ($token === false) {
-            return ['ret'=>0, 'msg'=>'验证码已过期，请刷新页面重试'];
+            return ['ret' => 0, 'msg' => '验证码已过期，请刷新页面重试'];
         }
         $ga = new GoogleAuthenticator();
-        if (!$ga->verifyCode($token, $code)) {
-            return ['ret'=>0, 'msg'=>'验证码错误'];
+        if (! $ga->verifyCode($token, $code)) {
+            return ['ret' => 0, 'msg' => '验证码错误'];
         }
         $mfaCredential = new MFACredential();
         $mfaCredential->userid = $user->id;
@@ -47,7 +52,7 @@ final class TOTP
         $mfaCredential->created_at = date('Y-m-d H:i:s');
         $mfaCredential->save();
         $redis->del('totp_register:' . session_id());
-        return ['ret'=>1, 'msg'=>'注册成功'];
+        return ['ret' => 1, 'msg' => '注册成功'];
     }
 
     public static function totpVerifyHandle(User $user, string $code): array
@@ -59,10 +64,5 @@ final class TOTP
         }
         $secret = json_decode($mfaCredential->body, true)['token'] ?? '';
         return $ga->verifyCode($secret, $code) ? ['ret' => 1, 'msg' => '验证成功'] : ['ret' => 0, 'msg' => '验证失败'];
-    }
-
-    public static function getGaUrl(User $user, string $token): string
-    {
-        return 'otpauth://totp/' .$_ENV['appName'].':'.rawurlencode($user->email).'?secret='.$token.'&issuer='.rawurlencode($_ENV['appName']);
     }
 }

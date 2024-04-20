@@ -110,7 +110,7 @@
 
         const {startAuthentication} = SimpleWebAuthnBrowser;
         document.getElementById('webauthnLogin').addEventListener('click', async () => {
-            const resp = await fetch('/auth/webauthn_request');
+            const resp = await fetch('/auth/fido_request');
             let asseResp;
             try {
                 asseResp = await startAuthentication(await resp.json());
@@ -118,7 +118,7 @@
                 document.getElementById("fail-message").innerHTML = error;
                 throw error;
             }
-            const verificationResp = await fetch('/auth/webauthn_verify', {
+            const verificationResp = await fetch('/auth/fido_verify', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

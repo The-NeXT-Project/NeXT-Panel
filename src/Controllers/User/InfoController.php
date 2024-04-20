@@ -6,12 +6,11 @@ namespace App\Controllers\User;
 
 use App\Controllers\BaseController;
 use App\Models\Config;
-use App\Models\User;
 use App\Models\MFACredential;
+use App\Models\User;
 use App\Services\Auth;
 use App\Services\Cache;
 use App\Services\Filter;
-use App\Services\MFA;
 use App\Utils\Hash;
 use App\Utils\ResponseHelper;
 use App\Utils\Tools;
@@ -44,7 +43,7 @@ final class InfoController extends BaseController
         $fido_devices = (new MFACredential())->where('userid', $this->user->id)
                             ->where('type', 'fido')
                             ->get(['id','name','created_at','used_at']);
-
+        $fido_devices = $fido_devices->isEmpty() ? null : $fido_devices;
         return $response->write($this->view()
             ->assign('user', $this->user)
             ->assign('themes', $themes)

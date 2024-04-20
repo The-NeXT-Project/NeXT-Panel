@@ -71,9 +71,9 @@ return static function (Slim\App $app): void {
         $group->post('/contact_method', App\Controllers\User\InfoController::class . ':updateContactMethod');
         $group->post('/theme', App\Controllers\User\InfoController::class . ':updateTheme');
         $group->post('/kill', App\Controllers\User\InfoController::class . ':sendToGulag');
-        $group->get('/webauthn_reg', App\Controllers\User\MFAController::class . ':requestRegister');
-        $group->post('/webauthn_reg', App\Controllers\User\MFAController::class . ':registerHandler');
-        $group->delete('/webauthn_reg/{id:[0-9]+}', App\Controllers\User\MFAController::class . ':deleteDevice');
+        $group->get('/webauthn_reg', App\Controllers\User\MFAController::class . ':webauthnRequestRegister');
+        $group->post('/webauthn_reg', App\Controllers\User\MFAController::class . ':webauthnRegisterHandler');
+        $group->delete('/webauthn_reg/{id:[0-9]+}', App\Controllers\User\MFAController::class . ':webauthnDelete');
         // 发送验证邮件
         $group->post('/send', App\Controllers\AuthController::class . ':sendVerify');
         // MFA
@@ -82,8 +82,7 @@ return static function (Slim\App $app): void {
         $group->delete('/totp_reg', App\Controllers\User\MFAController::class . ':totpDelete');
         $group->get('/fido_reg', App\Controllers\User\MFAController::class . ':fidoRegisterRequest');
         $group->post('/fido_reg', App\Controllers\User\MFAController::class . ':fidoRegisterHandle');
-        //TODO: delete device
-
+        $group->delete('/fido_reg/{id:[0-9]+}', App\Controllers\User\MFAController::class . ':fidoDelete');
         // 深色模式切换
         $group->post('/switch_theme_mode', App\Controllers\UserController::class . ':switchThemeMode');
         // 订阅记录
@@ -132,6 +131,8 @@ return static function (Slim\App $app): void {
         $group->get('/webauthn_request', App\Controllers\AuthController::class . ':webauthnRequest');
         $group->post('/webauthn_verify', App\Controllers\AuthController::class . ':webauthnHandle');
         $group->post('/totp_verify', App\Controllers\AuthController::class . ':mfaTotpHandle');
+        $group->get('/fido_request', App\Controllers\AuthController::class . ':mfaFidoRequest');
+        $group->post('/fido_verify', App\Controllers\AuthController::class . ':mfaFidoAssert');
         $group->get('/register', App\Controllers\AuthController::class . ':register');
         $group->post('/register', App\Controllers\AuthController::class . ':registerHandle');
         $group->post('/send', App\Controllers\AuthController::class . ':sendVerify');

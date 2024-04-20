@@ -318,8 +318,8 @@ final class User extends Model
 
         return [
             'require' => true,
-            'fido' => $fido!==null,
-            'totp' => $totp!==null,
+            'fido' => $fido !== null,
+            'totp' => $totp !== null,
         ];
     }
 }

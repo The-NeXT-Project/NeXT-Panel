@@ -1,6 +1,7 @@
 {include file='user/header.tpl'}
 
 <script src="//{$config['jsdelivr_url']}/npm/jquery/dist/jquery.min.js"></script>
+<script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
 
 <div class="page-wrapper">
     <div class="container-xl">
@@ -194,75 +195,6 @@
                                 </div>
                                 <div class="tab-pane" id="login_security" role="tabpanel">
                                     <div class="row row-deck row-cards">
-{*                                        <div class="col-sm-12 col-md-6">*}
-{*                                            <div class="card">*}
-{*                                                <div class="card-body">*}
-{*                                                    <h3 class="card-title">多因素认证</h3>*}
-{*                                                    <div class="col-md-12">*}
-{*                                                        <div class="col-sm-6 col-md-6">*}
-{*                                                            <i class="ti ti-brand-apple"></i>*}
-{*                                                            <a target="view_window"*}
-{*                                                               href="https://apps.apple.com/us/app/google-authenticator/id388497605">iOS*}
-{*                                                                客户端*}
-{*                                                            </a>*}
-{*                                                            &nbsp;&nbsp;&nbsp;*}
-{*                                                            <i class="ti ti-brand-android"></i>*}
-{*                                                            <a target="view_window"*}
-{*                                                               href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2">Android*}
-{*                                                                客户端*}
-{*                                                            </a>*}
-{*                                                        </div>*}
-{*                                                    </div>*}
-{*                                                    <br>*}
-{*                                                    <div class="row">*}
-{*                                                        <div class="col-md-3">*}
-{*                                                            <p id="qrcode"></p>*}
-{*                                                        </div>*}
-{*                                                        <div class="col-md-9">*}
-{*                                                            <div class="mb-3">*}
-{*                                                                <select id="ga-enable" class="form-select">*}
-{*                                                                    <option value="0">不使用</option>*}
-{*                                                                    <option value="1"*}
-{*                                                                            {if $user->ga_enable === '1'}selected{/if}>*}
-{*                                                                        使用两步认证登录*}
-{*                                                                    </option>*}
-{*                                                                </select>*}
-{*                                                            </div>*}
-{*                                                            <div class="mb-3">*}
-{*                                                                <input id="ga-test-code" type="text"*}
-{*                                                                       class="form-control"*}
-{*                                                                       placeholder="测试两步认证验证码">*}
-{*                                                            </div>*}
-{*                                                            <div class="col-md-12">*}
-{*                                                                <p>密钥：*}
-{*                                                                    <code id="ga-token">*}
-{*                                                                        {$user->ga_token}*}
-{*                                                                    </code>*}
-{*                                                                </p>*}
-{*                                                            </div>*}
-{*                                                        </div>*}
-{*                                                    </div>*}
-{*                                                </div>*}
-{*                                                <div class="card-footer">*}
-{*                                                    <div class="d-flex">*}
-{*                                                        <button class="btn btn-link"*}
-{*                                                                hx-post="/user/ga_reset" hx-swap="none" >*}
-{*                                                            重置*}
-{*                                                        </button>*}
-{*                                                        <button class="btn btn-link"*}
-{*                                                                hx-post="/user/ga_check" hx-swap="none"*}
-{*                                                                hx-vals='js:{ code: document.getElementById("ga-test-code").value }'>*}
-{*                                                            测试*}
-{*                                                        </button>*}
-{*                                                        <button class="btn btn-primary ms-auto"*}
-{*                                                                hx-post="/user/ga_set" hx-swap="none"*}
-{*                                                                hx-vals='js:{ enable: document.getElementById("ga-enable").value }'>*}
-{*                                                            设置*}
-{*                                                        </button>*}
-{*                                                    </div>*}
-{*                                                </div>*}
-{*                                            </div>*}
-{*                                        </div>*}
                                         <div class="col-sm-12 col-md-6">
                                             <div class="card">
                                                 <div class="card-body">
@@ -541,6 +473,10 @@
     {/if}
 
     <script>
+        {literal}
+        const {startRegistration} = SimpleWebAuthnBrowser;
+        {/literal}
+
         {if $user->im_type === 0 && $user->im_value === ''}
         let oauthProvider = $('#oauth-provider');
 

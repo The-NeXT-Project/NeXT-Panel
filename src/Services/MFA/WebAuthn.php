@@ -41,15 +41,6 @@ final class WebAuthn
 {
     public static int $timeout = 30_000;
 
-    public static function generateUserEntity(User $user): PublicKeyCredentialUserEntity
-    {
-        return PublicKeyCredentialUserEntity::create(
-            $user->email,
-            $user->uuid,
-            $user->user_name
-        );
-    }
-
     public static function registerRequest(User $user): PublicKeyCredentialCreationOptions
     {
         $rpEntity = self::generateRPEntity();
@@ -76,6 +67,15 @@ final class WebAuthn
     public static function generateRPEntity(): PublicKeyCredentialRpEntity
     {
         return PublicKeyCredentialRpEntity::create($_ENV['appName'], Tools::getSiteDomain());
+    }
+
+    public static function generateUserEntity(User $user): PublicKeyCredentialUserEntity
+    {
+        return PublicKeyCredentialUserEntity::create(
+            $user->email,
+            $user->uuid,
+            $user->user_name
+        );
     }
 
     public static function getPublicKeyCredentialParametersList(): array
@@ -130,7 +130,7 @@ final class WebAuthn
         $webauthn->body = json_encode($publicKeyCredentialSource);
         $webauthn->created_at = date('Y-m-d H:i:s');
         $webauthn->used_at = null;
-        $webauthn->name = $data['name'] === '' ?  null : $data['name'];
+        $webauthn->name = $data['name'] === '' ? null : $data['name'];
         $webauthn->type = 'passkey';
         $webauthn->save();
         return ['ret' => 1, 'msg' => '注册成功'];

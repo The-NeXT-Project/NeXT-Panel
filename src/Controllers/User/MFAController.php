@@ -8,7 +8,6 @@ use App\Controllers\BaseController;
 use App\Models\MFACredential;
 use App\Services\MFA;
 use App\Services\MFA\WebAuthn;
-use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Response;
 use Slim\Http\ServerRequest;
@@ -41,7 +40,7 @@ final class MFAController extends BaseController
             ]);
         }
         $webauthnDevice->delete();
-        return $response->withHeader('HX-Redirect', '/user/edit#login_security')->withJson([
+        return $response->withHeader('HX-Refresh', true)->withJson([
             'ret' => 1,
             'msg' => '删除成功',
         ]);
@@ -81,9 +80,8 @@ final class MFAController extends BaseController
 
     public function totpDelete(ServerRequest $request, Response $response, array $args): ResponseInterface
     {
-        $user = $this->user;
-        (new MFACredential())->where('userid', $user->id)->where('type', 'totp')->delete();
-        return $response->withJson([
+        (new MFACredential())->where('userid', $this->user->id)->where('type', 'totp')->delete();
+        return $response->withHeader('HX-Refresh', true)->withJson([
             'ret' => 1,
             'msg' => '删除成功',
         ]);
@@ -102,7 +100,6 @@ final class MFAController extends BaseController
 
     public function fidoDelete(ServerRequest $request, Response $response, array $args): ResponseInterface
     {
-        $user = $this->user;
         $id = $request->getParam('id');
         if ($id === '') {
             return $response->withJson([
@@ -110,64 +107,10 @@ final class MFAController extends BaseController
                 'msg' => 'ID不能为空',
             ]);
         }
-        $device = (new MFACredential())->where('userid', $user->id)->where('type', 'fido')->where('id', $id)->first();
-        (new MFACredential())->where('userid', $user->id)->where('type', 'fido')->delete();
-        return $response->withJson([
+        (new MFACredential())->where('userid', $this->user->id)->where('type', 'fido')->where('id', $id)->delete();
+        return $response->withHeader('HX-Refresh', true)->withJson([
             'ret' => 1,
             'msg' => '删除成功',
-        ]);
-    }
-
-    public function setGa(ServerRequest $request, Response $response, array $args): ResponseInterface
-    {
-        $enable = $request->getParam('enable');
-
-        if ($enable === '') {
-            return $response->withJson([
-                'ret' => 0,
-                'msg' => '选项无效',
-            ]);
-        }
-
-        $user = $this->user;
-        $user->ga_enable = $enable;
-        $user->save();
-
-        if ($user->save()) {
-            return $response->withJson([
-                'ret' => 1,
-                'msg' => '设置成功',
-            ]);
-        }
-
-        return $response->withJson([
-            'ret' => 0,
-            'msg' => '设置失败',
-        ]);
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function resetGa(ServerRequest $request, Response $response, array $args): ResponseInterface
-    {
-        $user = $this->user;
-        $user->ga_token = MFA::generateGaToken();
-
-        if ($user->save()) {
-            return $response->withJson([
-                'ret' => 1,
-                'msg' => '重置成功',
-                'data' => [
-                    'ga-token' => $user->ga_token,
-                    'ga-url' => MFA::getGaUrl($user),
-                ],
-            ]);
-        }
-
-        return $response->withJson([
-            'ret' => 0,
-            'msg' => '重置失败',
         ]);
     }
 }
