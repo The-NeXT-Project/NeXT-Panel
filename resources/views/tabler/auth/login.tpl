@@ -29,10 +29,6 @@
                     </div>
                 </div>
                 <div class="mb-2">
-                    <label class="form-label">两步认证</label>
-                    <input id="mfa_code" type="email" class="form-control" placeholder="如果没有设置两步认证可留空">
-                </div>
-                <div class="mb-2">
                     <label class="form-check">
                         <input id="remember_me" type="checkbox" class="form-check-input"/>
                         <span class="form-check-label">记住此设备</span>
@@ -53,13 +49,12 @@
                                 {/if}
                                 email: document.getElementById("email").value,
                                 password: document.getElementById("password").value,
-                                mfa_code: document.getElementById("mfa_code").value,
                                 remember_me: document.getElementById("remember_me").checked,
                              }'>
                         登录
                     </button>
                     <button class="btn btn-primary w-100" id="webauthnLogin">
-                        使用WebAuthn登录
+                        使用 Passkeys 登录
                     </button>
                 </div>
             </div>

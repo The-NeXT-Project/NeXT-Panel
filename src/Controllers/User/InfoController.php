@@ -7,7 +7,7 @@ namespace App\Controllers\User;
 use App\Controllers\BaseController;
 use App\Models\Config;
 use App\Models\User;
-use App\Models\WebAuthnDevice;
+use App\Models\MFACredential;
 use App\Services\Auth;
 use App\Services\Cache;
 use App\Services\Filter;
@@ -35,15 +35,23 @@ final class InfoController extends BaseController
     {
         $themes = Tools::getDir(BASE_PATH . '/resources/views');
         $methods = Tools::getSsMethod('method');
-        $ga_url = MFA::getGaUrl($this->user);
-        $webauthn_devices = (new WebAuthnDevice())->where('userid', $this->user->id)->get();
+        $webauthn_devices = (new MFACredential())->where('userid', $this->user->id)
+                            ->where('type', 'passkey')
+                            ->get(['id','name','created_at','used_at']);
+        $totp_devices = (new MFACredential())->where('userid', $this->user->id)
+                            ->where('type', 'totp')
+                            ->first(['id','created_at','used_at']);
+        $fido_devices = (new MFACredential())->where('userid', $this->user->id)
+                            ->where('type', 'fido')
+                            ->get(['id','name','created_at','used_at']);
 
         return $response->write($this->view()
             ->assign('user', $this->user)
             ->assign('themes', $themes)
             ->assign('methods', $methods)
-            ->assign('ga_url', $ga_url)
             ->assign('webauthn_devices', $webauthn_devices)
+            ->assign('totp_devices', $totp_devices)
+            ->assign('fido_devices', $fido_devices)
             ->fetch('user/edit.tpl'));
     }
 

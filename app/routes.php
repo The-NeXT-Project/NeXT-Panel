@@ -71,15 +71,19 @@ return static function (Slim\App $app): void {
         $group->post('/contact_method', App\Controllers\User\InfoController::class . ':updateContactMethod');
         $group->post('/theme', App\Controllers\User\InfoController::class . ':updateTheme');
         $group->post('/kill', App\Controllers\User\InfoController::class . ':sendToGulag');
-        $group->get('/webauthn_reg', App\Controllers\User\WebAuthnController::class . ':requestRegister');
-        $group->post('/webauthn_reg', App\Controllers\User\WebAuthnController::class . ':registerHandler');
-        $group->delete('/webauthn_reg/{id:[0-9]+}', App\Controllers\User\WebAuthnController::class . ':deleteDevice');
+        $group->get('/webauthn_reg', App\Controllers\User\MFAController::class . ':requestRegister');
+        $group->post('/webauthn_reg', App\Controllers\User\MFAController::class . ':registerHandler');
+        $group->delete('/webauthn_reg/{id:[0-9]+}', App\Controllers\User\MFAController::class . ':deleteDevice');
         // 发送验证邮件
         $group->post('/send', App\Controllers\AuthController::class . ':sendVerify');
         // MFA
-        $group->post('/ga_check', App\Controllers\User\MFAController::class . ':checkGa');
-        $group->post('/ga_set', App\Controllers\User\MFAController::class . ':setGa');
-        $group->post('/ga_reset', App\Controllers\User\MFAController::class . ':resetGa');
+        $group->get('/totp_reg', App\Controllers\User\MFAController::class . ':totpRegisterRequest');
+        $group->post('/totp_reg', App\Controllers\User\MFAController::class . ':totpRegisterHandle');
+        $group->delete('/totp_reg', App\Controllers\User\MFAController::class . ':totpDelete');
+        $group->get('/fido_reg', App\Controllers\User\MFAController::class . ':fidoRegisterRequest');
+        $group->post('/fido_reg', App\Controllers\User\MFAController::class . ':fidoRegisterHandle');
+        //TODO: delete device
+
         // 深色模式切换
         $group->post('/switch_theme_mode', App\Controllers\UserController::class . ':switchThemeMode');
         // 订阅记录
@@ -124,8 +128,10 @@ return static function (Slim\App $app): void {
     $app->group('/auth', static function (RouteCollectorProxy $group): void {
         $group->get('/login', App\Controllers\AuthController::class . ':login');
         $group->post('/login', App\Controllers\AuthController::class . ':loginHandle');
+        $group->get('/2fa', App\Controllers\AuthController::class . ':twoFactor');
         $group->get('/webauthn_request', App\Controllers\AuthController::class . ':webauthnRequest');
         $group->post('/webauthn_verify', App\Controllers\AuthController::class . ':webauthnHandle');
+        $group->post('/totp_verify', App\Controllers\AuthController::class . ':mfaTotpHandle');
         $group->get('/register', App\Controllers\AuthController::class . ':register');
         $group->post('/register', App\Controllers\AuthController::class . ':registerHandle');
         $group->post('/send', App\Controllers\AuthController::class . ':sendVerify');

@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Services\MFA;
 
+use App\Models\MFACredential;
 use App\Models\User;
-use App\Models\WebAuthnDevice;
+use App\Services\Cache;
 use App\Utils\Tools;
 use Cose\Algorithm\Manager;
 use Cose\Algorithm\Signature\ECDSA;
@@ -38,16 +39,21 @@ use Webauthn\PublicKeyCredentialUserEntity;
 
 final class WebAuthn
 {
-    private static int $timeout = 30_000;
+    public static int $timeout = 30_000;
 
-    public static function registerDevice(User $user): PublicKeyCredentialCreationOptions
+    public static function generateUserEntity(User $user): PublicKeyCredentialUserEntity
     {
-        $rpEntity = self::generateRPEntity();
-        $userEntity = PublicKeyCredentialUserEntity::create(
+        return PublicKeyCredentialUserEntity::create(
             $user->email,
             $user->uuid,
             $user->user_name
         );
+    }
+
+    public static function registerRequest(User $user): PublicKeyCredentialCreationOptions
+    {
+        $rpEntity = self::generateRPEntity();
+        $userEntity = self::generateUserEntity($user);
         $authenticatorSelectionCriteria = AuthenticatorSelectionCriteria::create(
             userVerification: AuthenticatorSelectionCriteria::USER_VERIFICATION_REQUIREMENT_REQUIRED,
             residentKey: AuthenticatorSelectionCriteria::RESIDENT_KEY_REQUIREMENT_REQUIRED
@@ -63,16 +69,16 @@ final class WebAuthn
                 timeout: self::$timeout,
             );
         $redis = (new Cache())->initRedis();
-        $redis->setex('webauthn_register_options:' . $user->id, 300, json_encode($publicKeyCredentialCreationOptions));
+        $redis->setex('webauthn_register:' . $user->id, 300, json_encode($publicKeyCredentialCreationOptions));
         return $publicKeyCredentialCreationOptions;
     }
 
-    private static function generateRPEntity(): PublicKeyCredentialRpEntity
+    public static function generateRPEntity(): PublicKeyCredentialRpEntity
     {
         return PublicKeyCredentialRpEntity::create($_ENV['appName'], Tools::getSiteDomain());
     }
 
-    private static function getPublicKeyCredentialParametersList(): array
+    public static function getPublicKeyCredentialParametersList(): array
     {
         return [
             PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_ES256K),
@@ -102,7 +108,7 @@ final class WebAuthn
 
         $redis = (new Cache())->initRedis();
         $publicKeyCredentialCreationOptions = $serializer->deserialize(
-            $redis->get('webauthn_register_options:' . $user->id),
+            $redis->get('webauthn_register:' . $user->id),
             PublicKeyCredentialCreationOptions::class,
             'json'
         );
@@ -118,18 +124,19 @@ final class WebAuthn
             return ['ret' => 0, 'msg' => '验证失败'];
         }
         // save public key credential source
-        $webauthn = new WebAuthnDevice();
+        $webauthn = new MFACredential();
         $webauthn->userid = $user->id;
         $webauthn->rawid = $publicKeyCredentialSource->jsonSerialize()['publicKeyCredentialId'];
         $webauthn->body = json_encode($publicKeyCredentialSource);
         $webauthn->created_at = date('Y-m-d H:i:s');
         $webauthn->used_at = null;
-        $webauthn->name = $data['name'] === '' ? $data['name'] : null;
+        $webauthn->name = $data['name'] === '' ?  null : $data['name'];
+        $webauthn->type = 'passkey';
         $webauthn->save();
         return ['ret' => 1, 'msg' => '注册成功'];
     }
 
-    private static function getSerializer(): SerializerInterface
+    public static function getSerializer(): SerializerInterface
     {
         $coseAlgorithmManager = Manager::create();
         $coseAlgorithmManager->add(ECDSA\ES256::create());
@@ -145,7 +152,7 @@ final class WebAuthn
         return $factory->create();
     }
 
-    private static function getAuthenticatorAttestationResponseValidator(): AuthenticatorAttestationResponseValidator
+    public static function getAuthenticatorAttestationResponseValidator(): AuthenticatorAttestationResponseValidator
     {
         $csmFactory = new CeremonyStepManagerFactory();
         $creationCSM = $csmFactory->creationCeremony();
@@ -159,11 +166,11 @@ final class WebAuthn
         $publicKeyCredentialRequestOptions = self::getPublicKeyCredentialRequestOptions();
         $redis = (new Cache())->initRedis();
 
-        $redis->setex('webauthn_assertion_options:' . session_id(), 300, json_encode($publicKeyCredentialRequestOptions));
+        $redis->setex('webauthn_assertion:' . session_id(), 300, json_encode($publicKeyCredentialRequestOptions));
         return $publicKeyCredentialRequestOptions;
     }
 
-    private static function getPublicKeyCredentialRequestOptions(): PublicKeyCredentialRequestOptions
+    public static function getPublicKeyCredentialRequestOptions(): PublicKeyCredentialRequestOptions
     {
         return PublicKeyCredentialRequestOptions::create(
             random_bytes(32),
@@ -180,14 +187,21 @@ final class WebAuthn
         if (! isset($publicKeyCredential->response) || ! $publicKeyCredential->response instanceof AuthenticatorAssertionResponse) {
             return ['ret' => 0, 'msg' => '验证失败'];
         }
-        $publicKeyCredentialSource = (new WebAuthnDevice())->where('rawid', $publicKeyCredential->id)->first();
+        $publicKeyCredentialSource = (new MFACredential())
+            ->where('rawid', $publicKeyCredential->id)
+            ->where('type', 'passkey')
+            ->first();
         if ($publicKeyCredentialSource === null) {
             return ['ret' => 0, 'msg' => '设备未注册'];
+        }
+        $user = (new User())->where('id', $publicKeyCredentialSource->userid)->first();
+        if ($user === null) {
+            return ['ret' => 0, 'msg' => '用户不存在'];
         }
         try {
             $redis = (new Cache())->initRedis();
             $publicKeyCredentialRequestOptions = $serializer->deserialize(
-                $redis->get('webauthn_assertion_options:' . session_id()),
+                $redis->get('webauthn_assertion:' . session_id()),
                 PublicKeyCredentialRequestOptions::class,
                 'json'
             );
@@ -198,7 +212,7 @@ final class WebAuthn
                 $publicKeyCredential->response,
                 $publicKeyCredentialRequestOptions,
                 json_encode($data),
-                null,
+                $user->uuid,
                 [Tools::getSiteDomain()]
             );
         } catch (Exception $e) {
@@ -207,10 +221,10 @@ final class WebAuthn
         $publicKeyCredentialSource->body = json_encode($result);
         $publicKeyCredentialSource->used_at = date('Y-m-d H:i:s');
         $publicKeyCredentialSource->save();
-        return ['ret' => 1, 'msg' => '验证成功', 'userid' => $publicKeyCredentialSource->userid];
+        return ['ret' => 1, 'msg' => '验证成功', 'user' => $user];
     }
 
-    private static function getAuthenticatorAssertionResponseValidator(): AuthenticatorAssertionResponseValidator
+    public static function getAuthenticatorAssertionResponseValidator(): AuthenticatorAssertionResponseValidator
     {
         $csmFactory = new CeremonyStepManagerFactory();
         $requestCSM = $csmFactory->requestCeremony();

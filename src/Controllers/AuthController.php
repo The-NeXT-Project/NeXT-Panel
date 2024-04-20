@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Models\Config;
 use App\Models\InviteCode;
 use App\Models\LoginIp;
+use App\Models\MFACredential;
 use App\Models\User;
 use App\Services\Auth;
 use App\Services\Cache;
@@ -14,9 +15,9 @@ use App\Services\Captcha;
 use App\Services\Filter;
 use App\Services\Mail;
 use App\Services\MFA;
+use App\Services\MFA\WebAuthn;
 use App\Services\RateLimit;
 use App\Services\Reward;
-use App\Services\WebAuthn;
 use App\Utils\Cookie;
 use App\Utils\Hash;
 use App\Utils\ResponseHelper;
@@ -89,31 +90,33 @@ final class AuthController extends BaseController
                 'msg' => '邮箱或者密码错误',
             ]);
         }
-
-        if ($user->ga_enable && (strlen($mfa_code) !== 6 || ! MFA::verifyGa($user, $mfa_code))) {
-            $loginIp->collectLoginIP($_SERVER['REMOTE_ADDR'], 1, $user->id);
-
-            return $response->withJson([
-                'ret' => 0,
-                'msg' => '两步验证码错误',
-            ]);
-        }
-
         $time = 3600;
 
         if ($rememberMe) {
             $time = 86400 * ($_ENV['rememberMeDuration'] ?: 7);
         }
-
-        Auth::login($user->id, $time);
         // 记录登录成功
         $loginIp->collectLoginIP($_SERVER['REMOTE_ADDR'], 0, $user->id);
         $user->last_login_time = time();
         $user->save();
+        $secondAuth = $user->checkMFAstatus();
+        if (! $secondAuth['require']) {
+            Auth::login($user->id, $time);
+            return $response->withHeader('HX-Redirect', $redir)->withJson([
+                'ret' => 1,
+                'msg' => '登录成功',
+            ]);
+        }
+        $cache = (new Cache())->initRedis();
+        $cache->set('login_session:' . session_id(), json_encode([
+            'userid' => $user->id,
+            'second_auth' => $secondAuth,
+            'remember_time' => $time,
+        ]), 300);
 
-        return $response->withHeader('HX-Redirect', $redir)->withJson([
+        return $response->withHeader('HX-Redirect', '/auth/2fa')->withJson([
             'ret' => 1,
-            'msg' => '登录成功',
+            'msg' => '请进行二次验证',
         ]);
     }
 
@@ -247,8 +250,6 @@ final class AuthController extends BaseController
             }
         }
 
-        $user->ga_token = MFA::generateGaToken();
-        $user->ga_enable = 0;
         $user->class = $configs['reg_class'];
         $user->class_expire = date('Y-m-d H:i:s', time() + (int) $configs['reg_class_time'] * 86400);
         $user->node_iplimit = $configs['reg_ip_limit'];
@@ -383,18 +384,12 @@ final class AuthController extends BaseController
         $redir = $this->antiXss->xss_clean(Cookie::get('redir')) ?? '/user';
         $result = WebAuthn::challengeHandle($data);
         if ($result['ret'] === 1) {
-            $user = (new User())->where('id', $result['userid'])->first();
-            if ($user === null) {
-                return $response->withJson([
-                    'ret' => 0,
-                    'msg' => '用户不存在',
-                ]);
-            }
             $time = 3600;
             $rememberMe = $request->getParam('remember_me') === 'true' ? 1 : 0;
             if ($rememberMe) {
                 $time = 86400 * ($_ENV['rememberMeDuration'] ?: 7);
             }
+            $user = $result['user'];
             Auth::login($user->id, $time);
             $loginIp = new LoginIp();
             $loginIp->collectLoginIP($_SERVER['REMOTE_ADDR'], 0, $user->id);
@@ -404,6 +399,84 @@ final class AuthController extends BaseController
                 'ret' => 1,
                 'msg' => '登录成功',
                 'redir' => $redir,
+            ]);
+        }
+        return $response->withJson($result);
+    }
+
+    public function twoFactor(ServerRequest $request, Response $response, $next): ResponseInterface
+    {
+        $cache = (new Cache())->initRedis();
+        $login_session = $cache->get('login_session:' . session_id());
+        if ($login_session === false) {
+            return $response->withRedirect('/auth/login');
+        }
+        $login_session = json_decode($login_session, true);
+        return $response->write($this->view()
+            ->assign('base_url', $_ENV['baseUrl'])
+            ->assign('second_auth', $login_session['second_auth'])
+            ->fetch('auth/2fa.tpl'));
+    }
+
+    public function mfaFidoRequest(ServerRequest $request, Response $response, $next): ResponseInterface
+    {
+        $cache = (new Cache())->initRedis();
+        $login_session = $cache->get('login_session:' . session_id());
+        if ($login_session === false) {
+            return $response->withJson([
+                'ret' => 0,
+                'msg' => '登录会话不存在，请重新登录',
+            ]);
+        }
+        $login_session = json_decode($login_session, true);
+        return $response->withJson(MFA\FIDO::fidoAssertRequest($login_session['userid']));
+    }
+
+    public function mfaFidoAssert(ServerRequest $request, Response $response, $next): ResponseInterface
+    {
+        $data = $this->antiXss->xss_clean((array) $request->getParsedBody());
+        $cache = (new Cache())->initRedis();
+        $login_session = $cache->get('login_session:' . session_id());
+        if ($login_session === false) {
+            return $response->withHeader('HX-Redirect', '/auth/login')->withJson([
+                'ret' => 0,
+                'msg' => '登录会话不存在，请重新登录',
+            ]);
+        }
+        $login_session = json_decode($login_session, true);
+        $result = MFA\FIDO::fidoAssertHandle($login_session['userid'], $data);
+        $redir = $this->antiXss->xss_clean(Cookie::get('redir')) ?? '/user';
+        if ($result['ret'] === 1) {
+            $cache->del('login_session:' . session_id());
+            Auth::login($login_session['userid'], $login_session['remember_time']);
+            return $response->withHeader('HX-Redirect', $redir)->withJson([
+                'ret' => 1,
+                'msg' => '登录成功',
+            ]);
+        }
+        return $response->withJson($result);
+    }
+
+    public function mfaTotpHandle(ServerRequest $request, Response $response, $next): ResponseInterface
+    {
+        $data = $this->antiXss->xss_clean((array) $request->getParsedBody());
+        $cache = (new Cache())->initRedis();
+        $login_session = $cache->get('login_session:' . session_id());
+        if ($login_session === false) {
+            return $response->withJson([
+                'ret' => 0,
+                'msg' => '登录会话不存在，请重新登录',
+            ]);
+        }
+        $login_session = json_decode($login_session, true);
+        $result = MFA\TOTP::totpVerifyHandle((new User())->where('id', $login_session['userid'])->first(), $data['code']);
+        $redir = $this->antiXss->xss_clean(Cookie::get('redir')) ?? '/user';
+        if ($result['ret'] === 1) {
+            $cache->del('login_session:' . session_id());
+            Auth::login($login_session['userid'], $login_session['remember_time']);
+            return $response->withHeader('HX-Redirect', $redir)->withJson([
+                'ret' => 1,
+                'msg' => '登录成功',
             ]);
         }
         return $response->withJson($result);

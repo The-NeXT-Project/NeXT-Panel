@@ -1,7 +1,6 @@
 {include file='user/header.tpl'}
 
 <script src="//{$config['jsdelivr_url']}/npm/jquery/dist/jquery.min.js"></script>
-<script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
 
 <div class="page-wrapper">
     <div class="container-xl">
@@ -36,6 +35,13 @@
                                    role="tab">
                                     <i class="ti ti-shield-lock icon"></i>&nbsp;
                                     登录
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a href="#mfa" class="nav-link" data-bs-toggle="tab" aria-selected="true"
+                                   role="tab">
+                                    <i class="ti ti-2fa icon"></i>&nbsp;
+                                    双重认证
                                 </a>
                             </li>
                             <li class="nav-item" role="presentation">
@@ -188,75 +194,75 @@
                                 </div>
                                 <div class="tab-pane" id="login_security" role="tabpanel">
                                     <div class="row row-deck row-cards">
-                                        <div class="col-sm-12 col-md-6">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h3 class="card-title">多因素认证</h3>
-                                                    <div class="col-md-12">
-                                                        <div class="col-sm-6 col-md-6">
-                                                            <i class="ti ti-brand-apple"></i>
-                                                            <a target="view_window"
-                                                               href="https://apps.apple.com/us/app/google-authenticator/id388497605">iOS
-                                                                客户端
-                                                            </a>
-                                                            &nbsp;&nbsp;&nbsp;
-                                                            <i class="ti ti-brand-android"></i>
-                                                            <a target="view_window"
-                                                               href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2">Android
-                                                                客户端
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                    <br>
-                                                    <div class="row">
-                                                        <div class="col-md-3">
-                                                            <p id="qrcode"></p>
-                                                        </div>
-                                                        <div class="col-md-9">
-                                                            <div class="mb-3">
-                                                                <select id="ga-enable" class="form-select">
-                                                                    <option value="0">不使用</option>
-                                                                    <option value="1"
-                                                                            {if $user->ga_enable === '1'}selected{/if}>
-                                                                        使用两步认证登录
-                                                                    </option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <input id="ga-test-code" type="text"
-                                                                       class="form-control"
-                                                                       placeholder="测试两步认证验证码">
-                                                            </div>
-                                                            <div class="col-md-12">
-                                                                <p>密钥：
-                                                                    <code id="ga-token">
-                                                                        {$user->ga_token}
-                                                                    </code>
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="card-footer">
-                                                    <div class="d-flex">
-                                                        <button class="btn btn-link"
-                                                                hx-post="/user/ga_reset" hx-swap="none" >
-                                                            重置
-                                                        </button>
-                                                        <button class="btn btn-link"
-                                                                hx-post="/user/ga_check" hx-swap="none"
-                                                                hx-vals='js:{ code: document.getElementById("ga-test-code").value }'>
-                                                            测试
-                                                        </button>
-                                                        <button class="btn btn-primary ms-auto"
-                                                                hx-post="/user/ga_set" hx-swap="none"
-                                                                hx-vals='js:{ enable: document.getElementById("ga-enable").value }'>
-                                                            设置
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+{*                                        <div class="col-sm-12 col-md-6">*}
+{*                                            <div class="card">*}
+{*                                                <div class="card-body">*}
+{*                                                    <h3 class="card-title">多因素认证</h3>*}
+{*                                                    <div class="col-md-12">*}
+{*                                                        <div class="col-sm-6 col-md-6">*}
+{*                                                            <i class="ti ti-brand-apple"></i>*}
+{*                                                            <a target="view_window"*}
+{*                                                               href="https://apps.apple.com/us/app/google-authenticator/id388497605">iOS*}
+{*                                                                客户端*}
+{*                                                            </a>*}
+{*                                                            &nbsp;&nbsp;&nbsp;*}
+{*                                                            <i class="ti ti-brand-android"></i>*}
+{*                                                            <a target="view_window"*}
+{*                                                               href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2">Android*}
+{*                                                                客户端*}
+{*                                                            </a>*}
+{*                                                        </div>*}
+{*                                                    </div>*}
+{*                                                    <br>*}
+{*                                                    <div class="row">*}
+{*                                                        <div class="col-md-3">*}
+{*                                                            <p id="qrcode"></p>*}
+{*                                                        </div>*}
+{*                                                        <div class="col-md-9">*}
+{*                                                            <div class="mb-3">*}
+{*                                                                <select id="ga-enable" class="form-select">*}
+{*                                                                    <option value="0">不使用</option>*}
+{*                                                                    <option value="1"*}
+{*                                                                            {if $user->ga_enable === '1'}selected{/if}>*}
+{*                                                                        使用两步认证登录*}
+{*                                                                    </option>*}
+{*                                                                </select>*}
+{*                                                            </div>*}
+{*                                                            <div class="mb-3">*}
+{*                                                                <input id="ga-test-code" type="text"*}
+{*                                                                       class="form-control"*}
+{*                                                                       placeholder="测试两步认证验证码">*}
+{*                                                            </div>*}
+{*                                                            <div class="col-md-12">*}
+{*                                                                <p>密钥：*}
+{*                                                                    <code id="ga-token">*}
+{*                                                                        {$user->ga_token}*}
+{*                                                                    </code>*}
+{*                                                                </p>*}
+{*                                                            </div>*}
+{*                                                        </div>*}
+{*                                                    </div>*}
+{*                                                </div>*}
+{*                                                <div class="card-footer">*}
+{*                                                    <div class="d-flex">*}
+{*                                                        <button class="btn btn-link"*}
+{*                                                                hx-post="/user/ga_reset" hx-swap="none" >*}
+{*                                                            重置*}
+{*                                                        </button>*}
+{*                                                        <button class="btn btn-link"*}
+{*                                                                hx-post="/user/ga_check" hx-swap="none"*}
+{*                                                                hx-vals='js:{ code: document.getElementById("ga-test-code").value }'>*}
+{*                                                            测试*}
+{*                                                        </button>*}
+{*                                                        <button class="btn btn-primary ms-auto"*}
+{*                                                                hx-post="/user/ga_set" hx-swap="none"*}
+{*                                                                hx-vals='js:{ enable: document.getElementById("ga-enable").value }'>*}
+{*                                                            设置*}
+{*                                                        </button>*}
+{*                                                    </div>*}
+{*                                                </div>*}
+{*                                            </div>*}
+{*                                        </div>*}
                                         <div class="col-sm-12 col-md-6">
                                             <div class="card">
                                                 <div class="card-body">
@@ -297,38 +303,13 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-sm-12 col-md-12">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h3 class="card-title">WebAuthn</h3>
-                                                    <p class="card-subtitle">WebAuthn 是一种新的身份验证标准，使用生物识别或者安全密钥进行身份验证以取代传统密码。</p>
-                                                    <div class="row row-cols-1 row-cols-md-4 g-4">
-                                                        {foreach $webauthn_devices as $device}
-                                                            <div class="col">
-                                                                <div class="card">
-                                                                    <div class="card-body">
-                                                                        <h5 class="card-title">{$device->name|default:'未命名'}</h5>
-                                                                        <p class="card-text">添加时间: {$device->created_at}</p>
-                                                                        <p class="card-text">上次使用: {$device->used_at|default:'从未使用'}</p>
-                                                                        <button class="btn btn-danger"
-                                                                                hx-delete="/user/webauthn_reg/{$device->id}"
-                                                                                hx-swap="none"
-                                                                        >删除</button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        {/foreach}
-                                                    </div>
-                                                </div>
-                                                <div class="card-footer">
-                                                    <div class="d-flex">
-                                                        <button class="btn btn-primary ms-auto" id="webauthnReg">
-                                                            注册WebAuthn设备
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        {include file='user/mfa/webauthn.tpl'}
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="mfa" role="tabpanel">
+                                    <div class="row row-deck row-cards">
+                                        {include file='user/mfa/totp.tpl'}
+                                        {include file='user/mfa/fido.tpl'}
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="use_safety" role="tabpanel">
@@ -560,15 +541,6 @@
     {/if}
 
     <script>
-        let qrcode = new QRCode('qrcode', {
-            text: "{$ga_url}",
-            width: 128,
-            height: 128,
-            colorDark: '#000000',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H
-        });
-
         {if $user->im_type === 0 && $user->im_value === ''}
         let oauthProvider = $('#oauth-provider');
 
@@ -647,40 +619,5 @@
         }
         {/if}
     </script>
-
-    {literal}
-        <script>
-            const {startRegistration} = SimpleWebAuthnBrowser;
-            document.getElementById('webauthnReg').addEventListener('click', async () => {
-                const resp = await fetch('/user/webauthn_reg');
-                let attResp;
-                try {
-                    attResp = await startRegistration(await resp.json());
-                } catch (error) {
-                    $('#error-message').text(error.message);
-                    $('#fail-dialog').modal('show');
-                    throw error;
-                }
-                attResp.name = prompt("请输入设备名称:");
-                const verificationResp = await fetch('/user/webauthn_reg', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(attResp),
-                });
-
-                const verificationJSON = await verificationResp.json();
-                if (verificationJSON.ret === 1) {
-                    $('#success-message').text(verificationJSON.msg);
-                    $('#success-dialog').modal('show');
-                    location.reload();
-                } else {
-                    $('#error-message').text(verificationJSON.msg);
-                    $('#fail-dialog').modal('show');
-                }
-            });
-        </script>
-    {/literal}
 
     {include file='user/footer.tpl'}
