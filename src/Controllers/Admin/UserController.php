@@ -7,6 +7,7 @@ namespace App\Controllers\Admin;
 use App\Controllers\AuthController;
 use App\Controllers\BaseController;
 use App\Models\Config;
+use App\Models\MFACredential;
 use App\Models\User;
 use App\Models\UserMoneyLog;
 use App\Utils\Hash;
@@ -70,7 +71,6 @@ final class UserController extends BaseController
         'pass',
         'money',
         'is_admin',
-        'ga_enable',
         'is_banned',
         'banned_reason',
         'is_shadow_banned',
@@ -150,13 +150,24 @@ final class UserController extends BaseController
     public function edit(ServerRequest $request, Response $response, array $args): ResponseInterface
     {
         $user = (new User())->find($args['id']);
-
+        $secondFactor = $user->checkMFAstatus();
         return $response->write(
             $this->view()
                 ->assign('update_field', self::$update_field)
                 ->assign('edit_user', $user)
+                ->assign('second_factor', $secondFactor['require'])
                 ->fetch('admin/user/edit.tpl')
         );
+    }
+
+    public function deleteMFA(ServerRequest $request, Response $response, array $args): ResponseInterface
+    {
+        $id = (int) $args['id'];
+        (new MFACredential())->where('userid', $id)->delete();
+        return $response->withHeader('HX-Refresh', true)->withJson([
+            'ret' => 1,
+            'msg' => '二步认证已删除',
+        ]);
     }
 
     public function update(ServerRequest $request, Response $response, array $args): ResponseInterface
@@ -187,7 +198,6 @@ final class UserController extends BaseController
         $user->user_name = $request->getParam('user_name');
         $user->remark = $request->getParam('remark');
         $user->is_admin = $request->getParam('is_admin') === 'true' ? 1 : 0;
-        $user->ga_enable = $request->getParam('ga_enable') === 'true' ? 1 : 0;
         $user->is_banned = $request->getParam('is_banned') === 'true' ? 1 : 0;
         $user->banned_reason = $request->getParam('banned_reason');
         $user->is_shadow_banned = $request->getParam('is_shadow_banned') === 'true' ? 1 : 0;

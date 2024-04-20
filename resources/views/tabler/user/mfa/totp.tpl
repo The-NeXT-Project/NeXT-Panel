@@ -27,6 +27,7 @@
             </div>
         </div>
         <div class="card-footer">
+            <div class="d-flex">
             {if $totp_devices}
                 <button class="btn btn-red ms-auto"
                         hx-delete="/user/totp_reg"
@@ -38,6 +39,7 @@
                     启用
                 </button>
             {/if}
+            </div>
         </div>
     </div>
 </div>
@@ -121,7 +123,7 @@
                     var failDialog = new bootstrap.Modal(document.getElementById('fail-dialog'));
 
                     if (data.ret === 1) {
-                        totpModal.close();
+                        totpModal.hide();
                         document.getElementById("success-message").innerHTML = data.msg;
                         successDialog.show();
                         location.reload();

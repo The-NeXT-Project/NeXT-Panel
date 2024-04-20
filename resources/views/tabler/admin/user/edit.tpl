@@ -144,15 +144,6 @@
                                 </span>
                             </div>
                             <div class="form-group mb-3 row">
-                                <span class="col">两步认证</span>
-                                <span class="col-auto">
-                                    <label class="form-check form-check-single form-switch">
-                                        <input id="ga_enable" class="form-check-input" type="checkbox"
-                                               {if $edit_user->ga_enable}checked="" {/if}>
-                                    </label>
-                                </span>
-                            </div>
-                            <div class="form-group mb-3 row">
                                 <span class="col">账户异常状态</span>
                                 <span class="col-auto form-check-single form-switch">
                                     <input id="is_shadow_banned" class="form-check-input" type="checkbox"
@@ -173,6 +164,18 @@
                                 <span class="col-auto">
                                     <input id="banned_reason" type="text" class="form-control"
                                            value="{$edit_user->banned_reason}">
+                                </span>
+                            </div>
+                            <div class="form-group mb-3 row">
+                                <span class="col">两步认证</span>
+                                <span class="col-auto">
+                                {if $second_factor}
+                                    <button class="btn btn-danger"
+                                            hx-delete="/admin/user/{$edit_user->id}/mfa"
+                                            hx-swap="none">禁用</button>
+                                {else}
+                                    <button class="btn btn-secondary" disabled>未启用</button>
+                                {/if}
                                 </span>
                             </div>
                         </div>
@@ -252,7 +255,6 @@
                 {/foreach}
                 is_admin: $("#is_admin").is(":checked"),
                 is_banned: $("#is_banned").is(":checked"),
-                ga_enable: $("#ga_enable").is(":checked"),
                 is_shadow_banned: $("#is_shadow_banned").is(":checked"),
             },
             success: function (data) {

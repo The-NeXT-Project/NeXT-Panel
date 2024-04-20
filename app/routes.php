@@ -209,6 +209,7 @@ return static function (Slim\App $app): void {
         // User
         $group->get('/user', App\Controllers\Admin\UserController::class . ':index');
         $group->get('/user/{id:[0-9]+}/edit', App\Controllers\Admin\UserController::class . ':edit');
+        $group->delete('/user/{id:[0-9]+}/mfa', App\Controllers\Admin\UserController::class . ':deleteMFA');
         $group->put('/user/{id:[0-9]+}', App\Controllers\Admin\UserController::class . ':update');
         $group->post('/user/create', App\Controllers\Admin\UserController::class . ':create');
         $group->delete('/user/{id}', App\Controllers\Admin\UserController::class . ':delete');
