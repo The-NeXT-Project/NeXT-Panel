@@ -451,7 +451,7 @@ final class AuthController extends BaseController
             return $response->withJson([
                 'ret' => 1,
                 'msg' => '登录成功',
-                'redir' => $redir
+                'redir' => $redir,
             ]);
         }
         return $response->withJson($result);
