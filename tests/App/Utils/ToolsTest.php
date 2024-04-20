@@ -295,4 +295,15 @@ class ToolsTest extends TestCase
         $this->assertFalse(Tools::isJson('[]'));
         $this->assertFalse(Tools::isJson('what the'));
     }
+
+    /**
+     * @covers App\Utils\Tools::getSiteDomain
+     */
+    public function testGetSiteDomain()
+    {
+        $_ENV['baseUrl'] = 'https://localhost';
+        $domain = Tools::getSiteDomain();
+        $this->assertIsString($domain);
+        $this->assertEquals('localhost', $domain);
+    }
 }
