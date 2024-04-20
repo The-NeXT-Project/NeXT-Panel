@@ -58,7 +58,7 @@ final class TOTP
     public static function totpVerifyHandle(User $user, string $code): array
     {
         $ga = new GoogleAuthenticator();
-        $mfaCredential = (new MFACredential)->where('userid', $user->id)->where('type', 'totp')->first();
+        $mfaCredential = (new MFACredential())->where('userid', $user->id)->where('type', 'totp')->first();
         if ($mfaCredential === null) {
             return ['ret' => 0, 'msg' => '您还没有注册TOTP'];
         }

@@ -30,11 +30,11 @@ return new class() implements MigrationInterface {
             WHERE `ga_enable` = 1;
         ");
 
-        DB::getPdo()->exec("
+        DB::getPdo()->exec('
             ALTER TABLE `user` 
             DROP COLUMN `ga_enable`,
             DROP COLUMN `ga_token`;
-        ");
+        ');
 
         return 2024041800;
     }
@@ -47,9 +47,9 @@ return new class() implements MigrationInterface {
             ADD COLUMN `ga_token` varchar(255) NOT NULL DEFAULT '' COMMENT 'GA密钥';
         ");
 
-        DB::getPdo()->exec("
+        DB::getPdo()->exec('
             DROP TABLE IF EXISTS `mfa_credential`;
-        ");
+        ');
 
         return 2024040500;
     }

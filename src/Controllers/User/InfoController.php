@@ -35,14 +35,14 @@ final class InfoController extends BaseController
         $themes = Tools::getDir(BASE_PATH . '/resources/views');
         $methods = Tools::getSsMethod('method');
         $webauthn_devices = (new MFACredential())->where('userid', $this->user->id)
-                            ->where('type', 'passkey')
-                            ->get(['id','name','created_at','used_at']);
+            ->where('type', 'passkey')
+            ->get(['id', 'name', 'created_at', 'used_at']);
         $totp_devices = (new MFACredential())->where('userid', $this->user->id)
-                            ->where('type', 'totp')
-                            ->first(['id','created_at','used_at']);
+            ->where('type', 'totp')
+            ->first(['id', 'created_at', 'used_at']);
         $fido_devices = (new MFACredential())->where('userid', $this->user->id)
-                            ->where('type', 'fido')
-                            ->get(['id','name','created_at','used_at']);
+            ->where('type', 'fido')
+            ->get(['id', 'name', 'created_at', 'used_at']);
         $fido_devices = $fido_devices->isEmpty() ? null : $fido_devices;
         return $response->write($this->view()
             ->assign('user', $this->user)
