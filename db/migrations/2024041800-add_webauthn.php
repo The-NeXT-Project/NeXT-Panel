@@ -41,14 +41,10 @@ return new class() implements MigrationInterface {
 
     public function down(): int
     {
-        DB::getPdo()->exec('
-            DROP TABLE IF EXISTS `mfa_credential`;
-        ');
-
         DB::getPdo()->exec("
             ALTER TABLE `user` 
             ADD COLUMN `ga_enable` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT 'GA开关',
-            ADD COLUMN varchar(255) NOT NULL DEFAULT '' COMMENT 'GA密钥';
+            ADD COLUMN `ga_token` varchar(255) NOT NULL DEFAULT '' COMMENT 'GA密钥';
         ");
 
         DB::getPdo()->exec("
