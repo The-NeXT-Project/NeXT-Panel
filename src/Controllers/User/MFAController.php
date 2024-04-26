@@ -101,14 +101,7 @@ final class MFAController extends BaseController
 
     public function fidoDelete(ServerRequest $request, Response $response, array $args): ResponseInterface
     {
-        $id = $request->getParam('id');
-        if ($id === '') {
-            return $response->withJson([
-                'ret' => 0,
-                'msg' => 'ID不能为空',
-            ]);
-        }
-        (new MFACredential())->where('userid', $this->user->id)->where('type', 'fido')->where('id', $id)->delete();
+        (new MFACredential())->where('userid', $this->user->id)->where('type', 'fido')->where('id', (int) $args['id'])->delete();
         return $response->withHeader('HX-Refresh', true)->withJson([
             'ret' => 1,
             'msg' => '删除成功',

@@ -82,8 +82,7 @@
     });
 
     htmx.on("htmx:afterRequest", function(evt) {
-        if (evt.detail.xhr.getResponseHeader('HX-Refresh') === 'true' ||
-            evt.detail.xhr.getResponseHeader('HX-Trigger'))
+        if (evt.detail.xhr.getResponseHeader('HX-Trigger'))
         {
             return;
         }
@@ -122,6 +121,13 @@
         } else {
             document.getElementById("fail-message").innerHTML = res.msg;
             failDialog.show();
+        }
+
+        if (evt.detail.xhr.getResponseHeader('HX-Refresh'))
+        {
+            setTimeout(function() {
+                location.reload();
+            }, {$config['jump_delay']});
         }
     });
 </script>

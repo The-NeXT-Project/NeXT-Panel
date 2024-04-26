@@ -39,36 +39,37 @@
         </div>
     </div>
 </div>
-{literal}
-    <script>
-        document.getElementById('fidoReg').addEventListener('click', async () => {
-            const resp = await fetch('/user/fido_reg');
-            let attResp;
-            try {
-                attResp = await startRegistration(await resp.json());
-            } catch (error) {
-                $('#error-message').text(error.message);
-                $('#fail-dialog').modal('show');
-                throw error;
-            }
-            attResp.name = prompt("请输入设备名称:");
-            const verificationResp = await fetch('/user/fido_reg', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(attResp),
-            });
 
-            const verificationJSON = await verificationResp.json();
-            if (verificationJSON.ret === 1) {
-                $('#success-message').text(verificationJSON.msg);
-                $('#success-dialog').modal('show');
-                location.reload();
-            } else {
-                $('#error-message').text(verificationJSON.msg);
-                $('#fail-dialog').modal('show');
-            }
+<script>
+    document.getElementById('fidoReg').addEventListener('click', async () => {
+        const resp = await fetch('/user/fido_reg');
+        let attResp;
+        try {
+            attResp = await startRegistration(await resp.json());
+        } catch (error) {
+            $('#error-message').text(error.message);
+            $('#fail-dialog').modal('show');
+            throw error;
+        }
+        attResp.name = prompt("请输入设备名称:");
+        const verificationResp = await fetch('/user/fido_reg', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(attResp),
         });
-    </script>
-{/literal}
+
+        const verificationJSON = await verificationResp.json();
+        if (verificationJSON.ret === 1) {
+            $('#success-message').text(verificationJSON.msg);
+            $('#success-dialog').modal('show');
+            setTimeout(function () {
+                location.reload();
+            }, {$config['jump_delay']});
+        } else {
+            $('#error-message').text(verificationJSON.msg);
+            $('#fail-dialog').modal('show');
+        }
+    });
+</script>
