@@ -241,18 +241,18 @@ final class Cron
 
         foreach ($users as $user) {
             $user_id = $user->id;
-            // 获取用户账户等待激活的TABP订单
-            $pending_activation_orders = (new Order())->where('user_id', $user_id)
-                ->where('status', 'pending_activation')
-                ->where('product_type', 'tabp')
-                ->orderBy('id')
-                ->get();
             // 获取用户账户已激活的TABP订单，一个用户同时只能有一个已激活的TABP订单
             $activated_order = (new Order())->where('user_id', $user_id)
                 ->where('status', 'activated')
                 ->where('product_type', 'tabp')
                 ->orderBy('id')
                 ->first();
+            // 获取用户账户等待激活的TABP订单
+            $pending_activation_orders = (new Order())->where('user_id', $user_id)
+                ->where('status', 'pending_activation')
+                ->where('product_type', 'tabp')
+                ->orderBy('id')
+                ->get();
             // 如果用户账户中有已激活的TABP订单，则判断是否过期
             if ($activated_order !== null) {
                 $content = json_decode($activated_order->product_content);
@@ -373,6 +373,7 @@ final class Cron
             ->where('product_type', 'topup')
             ->orderBy('id')
             ->get();
+
         foreach ($orders as $order) {
             $user_id = $order->user_id;
             $user = (new User())->find($user_id);
@@ -388,10 +389,11 @@ final class Cron
                 $user->money - $content->amount,
                 $user->money,
                 $content->amount,
-                "充值订单 #{$order->id}，金额：{$content->amount}"
+                "充值订单 #{$order->id}"
             );
             echo "充值订单 #{$order->id} 已激活。\n";
         }
+
         echo Tools::toDateTime(time()) . ' 充值订单激活处理完成' . PHP_EOL;
     }
 
@@ -414,8 +416,8 @@ final class Cron
                 echo "已标记订单 #{$order->id} 为等待激活。\n";
                 continue;
             }
-            // 取消超时未支付的订单和关联账单
-            if ($order->create_time + 86400 < time()) {
+            // 取消超时未支付的订单和关联账单，跳过账单已经部分支付的订单
+            if ($order->create_time + 86400 < time() && $invoice->status !== 'partially_paid') {
                 $order->status = 'cancelled';
                 $order->update_time = time();
                 $order->save();

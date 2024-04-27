@@ -148,9 +148,6 @@
                         if (data.ret === 1) {
                             $('#success-message').text(data.msg);
                             $('#success-dialog').modal('show');
-                            setTimeout(function () {
-                                $(location).attr('href', '/user/invoice');
-                            }, {$config['jump_delay']});
                         } else {
                             $('#fail-message').text(data.msg);
                             $('#fail-dialog').modal('show');

@@ -6,10 +6,8 @@ namespace App\Services\Gateway;
 
 use App\Models\Config;
 use App\Models\Invoice;
-use App\Models\Order;
 use App\Models\Paylist;
 use App\Models\User;
-use App\Models\UserMoneyLog;
 use App\Services\Reward;
 use App\Utils\Tools;
 use Psr\Http\Message\ResponseInterface;
@@ -81,32 +79,9 @@ abstract class Base
         }
 
         $user = (new User())->find($paylist?->userid);
-        switch ($invoice?->type) {
-            case 'product':
-                // 返利
-                if ($user !== null && $user->ref_by > 0 && Config::obtain('invite_mode') === 'reward') {
-                    Reward::issuePaybackReward($user->id, $user->ref_by, $paylist->total, $paylist->invoice_id);
-                }
-                break;
-            case 'topup':
-                // 激活充值订单
-                $user->money += $paylist->total;
-                $user->save();
-                $order = (new Order())->find($invoice->order_id);
-                $content = json_decode($order->product_content);
-                $order->status = 'activated';
-                $order->update_time = time();
-                $order->save();
-                (new UserMoneyLog())->add(
-                    $user->id,
-                    $user->money - $content->amount,
-                    $user->money,
-                    $content->amount,
-                    "充值订单 #{$order->id}，金额：{$content->amount}"
-                );
-                break;
-            default:
-                break;
+
+        if ($user !== null && $user->ref_by > 0 && Config::obtain('invite_mode') === 'reward') {
+            Reward::issuePaybackReward($user->id, $user->ref_by, $paylist->total, $paylist->invoice_id);
         }
     }
 

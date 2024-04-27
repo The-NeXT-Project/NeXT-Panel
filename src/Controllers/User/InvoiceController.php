@@ -15,6 +15,7 @@ use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Response;
 use Slim\Http\ServerRequest;
 use function json_decode;
+use function json_encode;
 use function time;
 
 final class InvoiceController extends BaseController
@@ -112,6 +113,7 @@ final class InvoiceController extends BaseController
         // 组合支付
         if ($user->money > 0) {
             $money_before = $user->money;
+
             if ($user->money >= $invoice->price) {
                 $paid = $invoice->price;
                 $invoice->status = 'paid_balance';
@@ -119,7 +121,15 @@ final class InvoiceController extends BaseController
                 $paid = $user->money;
                 $invoice->status = 'partially_paid';
                 $invoice->price -= $paid;
+                $invoice_content = json_decode($invoice->content);
+                $invoice_content[] = [
+                    'content_id' => count($invoice_content),
+                    'name' => '余额部分支付',
+                    'price' => '-' . $paid,
+                ];
+                $invoice->content = json_encode($invoice_content);
             }
+
             $user->money -= $paid;
             $user->save();
 
@@ -141,9 +151,16 @@ final class InvoiceController extends BaseController
             ]);
         }
 
-        return $response->withJson([
+        if ($invoice->status === 'paid_balance') {
+            return $response->withHeader('HX-Redirect', '/user/invoice')->withJson([
+                'ret' => 1,
+                'msg' => '支付成功',
+            ]);
+        }
+
+        return $response->withHeader('HX-Redirect', '/user/invoice/'.$invoice->id.'/view')->withJson([
             'ret' => 1,
-            'msg' => '支付成功',
+            'msg' => '支付成功，剩余金额请使用其他方式支付',
         ]);
     }
 

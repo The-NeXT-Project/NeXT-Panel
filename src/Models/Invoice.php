@@ -12,6 +12,7 @@ use function time;
 
 /**
  * @property int    $id          账单ID
+ * @property string $type        账单类型
  * @property int    $user_id     归属用户ID
  * @property string $order_id    订单ID
  * @property string $content     账单内容
@@ -20,7 +21,6 @@ use function time;
  * @property int    $create_time 创建时间
  * @property int    $update_time 更新时间
  * @property int    $pay_time    支付时间
- * @property string $type        账单类型
  *
  * @mixin Builder
  */

@@ -121,6 +121,7 @@ final class Epay extends Base
                 return $response->withJson([
                     'ret' => 0,
                     'msg' => $resData['msg'] ?? '请求支付失败',
+                    //TODO: use syslog to log this error
                 ]);
             }
 
