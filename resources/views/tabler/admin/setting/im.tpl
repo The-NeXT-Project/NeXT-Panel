@@ -237,6 +237,69 @@
                                                        value="{$settings['telegram_diary_text']}">
                                             </div>
                                         </div>
+                                        <div class="form-group mb-3 row">
+                                            <label class="form-label col-3 col-form-label">是否通过Telegram通知新增审计规则</label>
+                                            <div class="col">
+                                                <select id="telegram_add_detect_rule" class="col form-select"
+                                                        value="{$settings['telegram_add_detect_rule']}">
+                                                    <option value="0" {if ! $settings['telegram_add_detect_rule']}selected{/if}>
+                                                        关闭
+                                                    </option>
+                                                    <option value="1" {if $settings['telegram_add_detect_rule']}selected{/if}>
+                                                        开启
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group mb-3 row">
+                                            <label class="form-label col-3 col-form-label">添加审计规则Telegram通知文本</label>
+                                            <div class="col">
+                                                <input id="telegram_add_detect_rule_text" type="text" class="form-control"
+                                                       value="{$settings['telegram_add_detect_rule_text']}">
+                                            </div>
+                                        </div>
+                                        <div class="form-group mb-3 row">
+                                            <label class="form-label col-3 col-form-label">是否通过Telegram通知新增审计规则</label>
+                                            <div class="col">
+                                                <select id="telegram_purchase_notify" class="col form-select"
+                                                        value="{$settings['telegram_purchase_notify']}">
+                                                    <option value="0" {if ! $settings['telegram_purchase_notify']}selected{/if}>
+                                                        关闭
+                                                    </option>
+                                                    <option value="1" {if $settings['telegram_purchase_notify']}selected{/if}>
+                                                        开启
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group mb-3 row">
+                                            <label class="form-label col-3 col-form-label">Telegram推送用户购买文本</label>
+                                            <div class="col">
+                                                <input id="telegram_purchase_notify_text" type="text" class="form-control"
+                                                       value="{$settings['telegram_purchase_notify_text']}">
+                                            </div>
+                                        </div>
+                                        <div class="form-group mb-3 row">
+                                            <label class="form-label col-3 col-form-label">是否启用Telegram推送工单</label>
+                                            <div class="col">
+                                                <select id="telegram_ticket_notify" class="col form-select"
+                                                        value="{$settings['telegram_ticket_notify']}">
+                                                    <option value="0" {if ! $settings['telegram_ticket_notify']}selected{/if}>
+                                                        关闭
+                                                    </option>
+                                                    <option value="1" {if $settings['telegram_ticket_notify']}selected{/if}>
+                                                        开启
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group mb-3 row">
+                                            <label class="form-label col-3 col-form-label">Telegram推送工单文本</label>
+                                            <div class="col">
+                                                <input id="telegram_ticket_notify_text" type="text" class="form-control"
+                                                       value="{$settings['telegram_ticket_notify_text']}">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="telegram">
@@ -268,6 +331,13 @@
                                             <div class="col">
                                                 <input id="telegram_chatid" type="text" class="form-control"
                                                        value="{$settings['telegram_chatid']}">
+                                            </div>
+                                        </div>
+                                        <div class="form-group mb-3 row">
+                                            <label class="form-label col-3 col-form-label">Telegram 管理员用户 ID</label>
+                                            <div class="col">
+                                                <input id="telegram_admin_userid" type="text" class="form-control"
+                                                       value="{$settings['telegram_admin_userid']}">
                                             </div>
                                         </div>
                                         <div class="form-group mb-3 row">

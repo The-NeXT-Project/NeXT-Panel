@@ -693,6 +693,15 @@
         "mark": "Telegram 群组会话 ID"
     },
     {
+        "item": "telegram_admin_userid",
+        "value": "-1",
+        "class": "im",
+        "is_public": 0,
+        "type": "int",
+        "default": "-1",
+        "mark": "Telegram 管理员用户 ID"
+    },
+    {
         "item": "telegram_bot",
         "value": "_bot",
         "class": "im",
@@ -889,6 +898,60 @@
         "type": "bool",
         "default": "0",
         "mark": "是否仅允许已绑定Telegram账户的用户加入群组"
+    },
+    {
+        "item": "telegram_add_detect_rule",
+        "value": "0",
+        "class": "im",
+        "is_public": 0,
+        "type": "bool",
+        "default": "0",
+        "mark": "是否通过Telegram通知新增审计规则"
+    },
+    {
+        "item": "telegram_add_detect_rule_text",
+        "value": "有新的审计规则：%rule_name%",
+        "class": "im",
+        "is_public": 0,
+        "type": "string",
+        "default": "有新的审计规则：%rule_name%",
+        "mark": "添加审计规则Telegram通知文本"
+    },
+    {
+        "item": "telegram_purchase_notify",
+        "value": "1",
+        "class": "im",
+        "is_public": 0,
+        "type": "bool",
+        "default": "1",
+        "mark": "是否启用Telegram推送用户购买"
+    },
+    {
+        "item": "telegram_purchase_notify_text",
+        "value": "新的订单通知： \n 用户ID： %user_id% \n 套餐名： %product_name% \n 金额： %product_price%",
+        "class": "im",
+        "is_public": 0,
+        "type": "string",
+        "default": "新的订单通知： \n 用户ID： %user_id% \n 套餐名： %product_name% \n 金额： %product_price%",
+        "mark": "Telegram推送用户购买文本"
+    },
+    {
+        "item": "telegram_ticket_notify",
+        "value": "1",
+        "class": "im",
+        "is_public": 0,
+        "type": "bool",
+        "default": "1",
+        "mark": "是否启用Telegram推送工单"
+    },
+    {
+        "item": "telegram_ticket_notify_text",
+        "value": "新的工单通知： \n 用户ID： %user_id% \n 工单标题： %ticket_title% \n 工单内容： %ticket_content%",
+        "class": "im",
+        "is_public": 0,
+        "type": "string",
+        "default": "新的工单通知： \n 用户ID： %user_id% \n 工单标题： %ticket_title% \n 工单内容： %ticket_content%",
+        "mark": "Telegram推送工单文本"
     },
     {
         "item": "enable_welcome_message",

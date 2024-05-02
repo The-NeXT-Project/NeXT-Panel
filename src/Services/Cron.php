@@ -286,6 +286,27 @@ final class Cron
                 $order->status = 'activated';
                 $order->update_time = time();
                 $order->save();
+                if (Config::obtain('telegram_purchase_notify')) {
+                    $notice_text = str_replace(
+                        [
+                            '%user_id%',
+                            '%product_name%',
+                            '%product_price%',
+                        ],
+                        [
+                            $user->id,
+                            $order->product_name,
+                            $order->price,
+                        ],
+                        Config::obtain('telegram_purchase_notify_text')
+                    );
+
+                    try {
+                        (new Telegram())->send(Config::obtain('telegram_admin_userid'), $notice_text);
+                    } catch (TelegramSDKException $e) {
+                        echo $e->getMessage();
+                    }
+                }
                 echo "TABP订单 #{$order->id} 已激活。\n";
             }
         }
@@ -315,6 +336,27 @@ final class Cron
                 $order->status = 'activated';
                 $order->update_time = time();
                 $order->save();
+                if (Config::obtain('telegram_purchase_notify')) {
+                    $notice_text = str_replace(
+                        [
+                            '%user_id%',
+                            '%product_name%',
+                            '%product_price%',
+                        ],
+                        [
+                            $user->id,
+                            $order->product_name,
+                            $order->price,
+                        ],
+                        Config::obtain('telegram_purchase_notify_text')
+                    );
+
+                    try {
+                        (new Telegram())->send(Config::obtain('telegram_admin_userid'), $notice_text);
+                    } catch (TelegramSDKException $e) {
+                        echo $e->getMessage();
+                    }
+                }
                 echo "流量包订单 #{$order->id} 已激活。\n";
             }
         }
@@ -356,6 +398,27 @@ final class Cron
                 $order->status = 'activated';
                 $order->update_time = time();
                 $order->save();
+                if (Config::obtain('telegram_purchase_notify')) {
+                    $notice_text = str_replace(
+                        [
+                            '%user_id%',
+                            '%product_name%',
+                            '%product_price%',
+                        ],
+                        [
+                            $user->id,
+                            $order->product_name,
+                            $order->price,
+                        ],
+                        Config::obtain('telegram_purchase_notify_text')
+                    );
+
+                    try {
+                        (new Telegram())->send(Config::obtain('telegram_admin_userid'), $notice_text);
+                    } catch (TelegramSDKException $e) {
+                        echo $e->getMessage();
+                    }
+                }
                 echo "时间包订单 #{$order->id} 已激活。\n";
             }
         }

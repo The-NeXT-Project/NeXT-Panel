@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Models\Config;
 use App\Models\DetectRule;
 use App\Services\IM\Telegram;
 use Exception;
@@ -86,7 +87,15 @@ final class DetectRuleController extends BaseController
             ]);
         }
 
-        (new Telegram())->sendMarkdown(0, '有新的审计规则：' . $rule->name);
+        if (Config::obtain('telegram_add_detect_rule')) {
+            $notice_text = str_replace(
+                '%rule_name%',
+                $rule->name,
+                Config::obtain('telegram_add_detect_rule_text')
+            );
+
+            (new Telegram())->send(0, $notice_text);
+        }
         return $response->withJson([
             'ret' => 1,
             'msg' => '添加成功',

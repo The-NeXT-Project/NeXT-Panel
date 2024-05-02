@@ -7,6 +7,7 @@ namespace App\Controllers\User;
 use App\Controllers\BaseController;
 use App\Models\Config;
 use App\Models\Ticket;
+use App\Services\IM\Telegram;
 use App\Services\Notification;
 use App\Services\RateLimit;
 use App\Utils\Tools;
@@ -98,6 +99,24 @@ final class TicketController extends BaseController
                 $_ENV['appName'] . '-新工单被开启',
                 '管理员，有人开启了新的工单，请你及时处理。'
             );
+        }
+
+        if (Config::obtain('telegram_ticket_notify')) {
+            $notice_text = str_replace(
+                [
+                    '%user_id%',
+                    '%ticket_title%',
+                    '%ticket_content%',
+                ],
+                [
+                    $this->user->id,
+                    $ticket->title,
+                    $this->antiXss->xss_clean($comment),
+                ],
+                Config::obtain('telegram_ticket_notify_text')
+            );
+
+            (new Telegram())->send(Config::obtain('telegram_admin_userid'), $notice_text);
         }
 
         return $response->withJson([
