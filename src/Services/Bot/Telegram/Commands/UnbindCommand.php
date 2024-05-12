@@ -91,7 +91,7 @@ final class UnbindCommand extends Command
             }
 
             if ($message_key !== '') {
-                $text = '键入的 Email 地址与你的账户不匹配.';
+                $text = '键入的 Email 地址与您的账户不匹配.';
             }
 
             if ($message_key === '/unbind') {
@@ -113,7 +113,7 @@ final class UnbindCommand extends Command
         $text = '以 `/unbind example@gmail.com` 的形式发送进行解绑。';
 
         if (Config::obtain('telegram_unbind_kick_member')) {
-            $text .= PHP_EOL . PHP_EOL . '根据管理员的设定，你解绑账户将会被自动移出用户群。';
+            $text .= PHP_EOL . PHP_EOL . '根据管理员的设定，您解绑账户将会被自动移出用户群。';
         }
 
         return $text;
