@@ -12,6 +12,8 @@ If you are interested in helping out, please contact us on Discord or Twitter.
 
 2. Regarding commit history and source code, we recently noticed an unauthorized redistribution attempt, which may draw unnecessary attention to the NeXT Panel project, for the longevity of SSPanel-NeXT and its projects, we have decided we will no longer publish git commit history. The newer release of the NeXT panel will contain a zip file that includes the project's source code.
 
+3. The only official repo of the NeXT panel is [SSPanel-NeXT/NeXT-Panel](https://github.com/SSPanel-NeXT/NeXT-Panel) on GitHub, we don't distribute our project's code anywhere else and you should NOT download source code archive from 3rd party website/repo because we can't guarantee it's integrity and security.
+
 ## TL;DR
 
 NeXT Panel (OSS Edition) is a multipurpose proxy service management system designed for Shadowsocks(2022) / Vmess / Trojan / TUIC protocol.
