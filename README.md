@@ -42,6 +42,9 @@ Note some of the features will not be available on the Pro Edition on day 1, we 
 ## Documentation
 
 [NeXT Panel Docs](https://nextpanel.dev/docs/category/overview)
+
+## Blog
+
 [NeXT Panel Blog](https://nextpanel.dev/blog)
 
 ## Support
