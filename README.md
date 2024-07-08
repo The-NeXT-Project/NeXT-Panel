@@ -5,23 +5,15 @@
 
 ## PSA
 
-1. We are looking for a new paid co-maintainer for this project who is familiar with PHP
-and can speak Persian/Arabic/Russian/Vietnamese to help with NeXT Panel's I18n translation effort.
-If you are interested in helping out, please contact us on Discord or Twitter.
+1. Regarding commit history and source code, we recently noticed an unauthorized redistribution attempt by SSPanel-UIM project, which may draw unnecessary attention to the NeXT Panel project, for the longevity of NeXT Panel and its projects, we have decided we will no longer publish git commit history. The newer release of the NeXT panel will contain a zip file that includes the project's source code.
 
-2. Regarding commit history and source code, we recently noticed an unauthorized redistribution attempt, which may draw unnecessary attention to the NeXT Panel project, for the longevity of SSPanel-NeXT and its projects, we have decided we will no longer publish git commit history. The newer release of the NeXT panel will contain a zip file that includes the project's source code.
+2. The only official repo of the NeXT panel is [The-NeXT-Project/NeXT-Panel](https://github.com/The-NeXT-Project/NeXT-Panel) on GitHub, we don't distribute our project's code anywhere else and you should NOT download source code archive from 3rd party website/repo because we can't guarantee it's integrity and security.
 
-3. The only official repo of the NeXT panel is [SSPanel-NeXT/NeXT-Panel](https://github.com/SSPanel-NeXT/NeXT-Panel) on GitHub, we don't distribute our project's code anywhere else and you should NOT download source code archive from 3rd party website/repo because we can't guarantee it's integrity and security.
+3. NeXT panel is NOT a continuation of the original SSPanel-UIM project, and we DO NOT approve of their behavior of routinely copying our code base and branding to the SSPanel-UIM repository despite we have repeatedly expressed our concern. We have stopped supporting the old UIM version OTA service, and if you are not using the NeXT panel, you should not open the issue here since the project will undergo heavy refactoring & redesign in the coming months and we will not be able to provide any help regards old version.
 
-4. NeXT panel is NOT a continuation of the original SSPanel-UIM project, and we DO NOT approve of their behavior of routinely copying our code base and branding to the SSPanel-UIM repository despite we have repeatedly expressed our concern. We have stopped supporting the old UIM version OTA service, and if you are not using the NeXT panel, you should not open the issue here since the project will undergo heavy refactoring & redesign in the coming months and we will not be able to provide any help regards old version.
+## Pro Edition
 
-## TL;DR
-
-NeXT Panel (OSS Edition) is a multipurpose proxy service management system designed for Shadowsocks(2022) / Vmess / Trojan / TUIC protocol.
-
-## About Pro version
-
-NeXT Panel (Pro Edition) is a work-in-progress version of the original OSS Edition, it replaced many of its PHP-based backends with high-performance Golang-based ones, and significantly improved site response time under heavy load.
+NeXT Panel (Pro Edition) is a multipurpose proxy service management system designed for Shadowsocks(2022) / Vmess / Trojan / TUIC protocol, it has redesigned system architecture and replaced many of its PHP-based backends with high-performance Golang-based ones, and significantly improved site response time under heavy load.
 
 The Pro version will use a yearly subscription model, we plan to provide a dedicated license purchase site and existing patron members can access it as well. We will publish further pricing info on our [Discord server](https://discord.gg/A7uFKCvf8V) and [Twitter account](https://twitter.com/SSPanel_NeXT), please stay tuned.
 
@@ -39,25 +31,18 @@ The Pro version will use a yearly subscription model, we plan to provide a dedic
 | Easy to use panel initialization wizard, no CLI operation is needed                                                       | ❌           | ✅           |
 | Integration with other cluster management system(Ansible/SaltStack), automatically manage your proxy servers in one place | ❌           | ✅(WiP)           |
 
-## Installation
-
-NeXT Panel requires the following programs to be installed and run normally:
-
-- Nginx（HTTPS configured）
-- PHP 8.2+ （OPcache+JIT enabled）
-- PHP Redis extension 6.0+
-- MariaDB 10.11+（Disable strict mode）
-- Redis 7.0+
+Note some of the features will not be available on the Pro Edition on day 1, we expect those features will be gradually rolled out in the coming months.
 
 ## Ecosystem
 
-- [NeXT Server](https://github.com/SSPanel-NeXT/NeXT-Server)
+- [NeXT Server](https://github.com/The-NeXT-Project/NeXT-Server)
 - NeXT Desktop(WiP)
-- [NetStatus-API-Go](https://github.com/SSPanel-NeXT/NetStatus-API-Go)
+- [NetStatus-API-Go](https://github.com/The-NeXT-Project/NetStatus-API-Go)
 
 ## Documentation
 
-[NeXT Panel Docs](https://nextpanel.dev)
+[NeXT Panel Docs](https://nextpanel.dev/docs/category/overview)
+[NeXT Panel Blog](https://nextpanel.dev/blog)
 
 ## Support
 
@@ -73,4 +58,4 @@ NeXT Panel requires the following programs to be installed and run normally:
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=SSPanel-NeXT/NeXT-Panel&type=Date)](https://star-history.com/#SSPanel-NeXT/NeXT-Panel&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=The-NeXT-Project/NeXT-Panel&type=Date)](https://star-history.com/#The-NeXT-Project/NeXT-Panel&Date)
