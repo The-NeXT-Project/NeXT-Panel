@@ -7,7 +7,7 @@
 
 1. Regarding commit history and source code, we recently noticed an unauthorized redistribution attempt by SSPanel-UIM project, which may draw unnecessary attention to the NeXT Panel project, for the longevity of NeXT Panel and its projects, we have decided we will no longer publish git commit history. The newer release of the NeXT panel will contain a zip file that includes the project's source code.
 
-2. The only official repo of the NeXT panel is [The-NeXT-Project/NeXT-Panel](https://github.com/The-NeXT-Project/NeXT-Panel) on GitHub, we don't distribute our project's code anywhere else and you should NOT download source code archive from 3rd party website/repo because we can't guarantee it's integrity and security.
+2. The only official repo of the NeXT panel is [The-NeXT-Project/NeXT-Panel](https://github.com/The-NeXT-Project/NeXT-Panel) on GitHub, we don't distribute our project's code anywhere else and you should NOT download source code archive from 3rd party website/repo because we can't guarantee its integrity and security.
 
 3. NeXT panel is NOT a continuation of the original SSPanel-UIM project, and we DO NOT approve of their behavior of routinely copying our code base and branding to the SSPanel-UIM repository despite we have repeatedly expressed our concern. We have stopped supporting the old UIM version OTA service, and if you are not using the NeXT panel, you should not open the issue here since the project will undergo heavy refactoring & redesign in the coming months and we will not be able to provide any help regards old version.
 
@@ -57,7 +57,7 @@ Note some of the features will not be available on the Pro Edition on day 1, we 
 
 ## License
 
-[GPL-3.0 License](blob/dev/LICENSE)
+[GPL-3.0](blob/dev/LICENSE)
 
 ## Star History
 

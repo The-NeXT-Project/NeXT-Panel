@@ -13,7 +13,7 @@ HTTPS enabled:
 PHP version:    
 DB version:  
 Redis version:    
-Commit:    
+NeXT Panel version:    
 
 **Bug Info**
 
